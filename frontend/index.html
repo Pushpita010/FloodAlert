@@ -62,7 +62,13 @@
             </div>
             <div class="header-right">
                 <button id="darkModeBtn" class="theme-toggle" title="Toggle Dark Mode">🌙</button>
+                <button id="emergencyBtn" class="emergency-sos-btn" title="Emergency Contacts">
+                    <span class="sos-icon">🚨</span>
+                    <span class="sos-text">SOS</span>
+                    <span class="sos-pulse"></span>
+                </button>
                 <button id="profileBtn" class="profile-btn" title="User Profile">
+                    <span class="profile-indicator"></span>
                     <span id="userInitial">👤</span>
                     <span id="userName">Profile</span>
                 </button>
@@ -72,6 +78,49 @@
 
     <!-- Toast Notification Container -->
     <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Emergency Contacts Dropdown -->
+    <div id="emergencyDropdown" class="emergency-dropdown hidden">
+        <div class="emergency-dropdown-header">
+            <h3>🚨 Emergency Contacts</h3>
+            <p>Quick access to emergency services</p>
+        </div>
+        <div class="emergency-dropdown-divider"></div>
+        <div class="emergency-list">
+            <div class="emergency-item" onclick="window.location.href='tel:102'">
+                <span class="emergency-item-icon">🚑</span>
+                <div class="emergency-item-info">
+                    <p class="emergency-item-name">Ambulance</p>
+                    <p class="emergency-item-number">📞 102</p>
+                </div>
+                <span class="emergency-call-btn">Call</span>
+            </div>
+            <div class="emergency-item" onclick="window.location.href='tel:100'">
+                <span class="emergency-item-icon">🚔</span>
+                <div class="emergency-item-info">
+                    <p class="emergency-item-name">Police</p>
+                    <p class="emergency-item-number">📞 100</p>
+                </div>
+                <span class="emergency-call-btn">Call</span>
+            </div>
+            <div class="emergency-item" onclick="window.location.href='tel:101'">
+                <span class="emergency-item-icon">🚒</span>
+                <div class="emergency-item-info">
+                    <p class="emergency-item-name">Fire Department</p>
+                    <p class="emergency-item-number">📞 101</p>
+                </div>
+                <span class="emergency-call-btn">Call</span>
+            </div>
+            <div class="emergency-item" onclick="window.location.href='tel:1070'">
+                <span class="emergency-item-icon">☎️</span>
+                <div class="emergency-item-info">
+                    <p class="emergency-item-name">Disaster Management</p>
+                    <p class="emergency-item-number">📞 1070</p>
+                </div>
+                <span class="emergency-call-btn">Call</span>
+            </div>
+        </div>
+    </div>
 
     <!-- User Profile Dropdown -->
     <div id="profileDropdown" class="profile-dropdown hidden">
@@ -269,41 +318,6 @@
                     <div class="legend-item">
                         <div class="legend-color" style="background-color: #4caf50;"></div>
                         <span>Low Risk</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Emergency Contacts Section -->
-            <div class="emergency-section">
-                <h2 class="section-title">🚨 Emergency Contacts</h2>
-                <div class="emergency-contacts">
-                    <div class="emergency-contact">
-                        <span class="emergency-icon">🚑</span>
-                        <div class="contact-info">
-                            <p class="contact-label">Ambulance</p>
-                            <p class="contact-number">102</p>
-                        </div>
-                    </div>
-                    <div class="emergency-contact">
-                        <span class="emergency-icon">🚔</span>
-                        <div class="contact-info">
-                            <p class="contact-label">Police</p>
-                            <p class="contact-number">100</p>
-                        </div>
-                    </div>
-                    <div class="emergency-contact">
-                        <span class="emergency-icon">🚒</span>
-                        <div class="contact-info">
-                            <p class="contact-label">Fire Dept</p>
-                            <p class="contact-number">101</p>
-                        </div>
-                    </div>
-                    <div class="emergency-contact">
-                        <span class="emergency-icon">☎️</span>
-                        <div class="contact-info">
-                            <p class="contact-label">Disaster Mgmt</p>
-                            <p class="contact-number">1070</p>
-                        </div>
                     </div>
                 </div>
             </div>

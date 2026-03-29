@@ -271,14 +271,145 @@ function getRiskColor(risk) {
 }
 
 /* ===================================
+   MODAL MANAGEMENT
+   =================================== */
+
+function initializeModals() {
+    // Modal menu items
+    const profileLink = document.getElementById('profileLink');
+    const settingsLink = document.getElementById('settingsLink');
+    const helpLink = document.getElementById('helpLink');
+    const aboutLink = document.getElementById('aboutLink');
+    
+    // Modals
+    const profileModal = document.getElementById('profileModal');
+    const settingsModal = document.getElementById('settingsModal');
+    const helpModal = document.getElementById('helpModal');
+    const aboutModal = document.getElementById('aboutModal');
+    
+    // Close buttons
+    const closeButtons = document.querySelectorAll('.modal-close');
+    
+    // Open modals
+    profileLink.addEventListener('click', () => {
+        openModal(profileModal);
+        updateProfileModal();
+    });
+    
+    settingsLink.addEventListener('click', () => {
+        openModal(settingsModal);
+    });
+    
+    helpLink.addEventListener('click', () => {
+        openModal(helpModal);
+    });
+    
+    aboutLink.addEventListener('click', () => {
+        openModal(aboutModal);
+    });
+    
+    // Close modals
+    closeButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const modal = e.target.closest('.modal');
+            if (modal) closeModal(modal);
+        });
+    });
+    
+    // Close on background click
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal(modal);
+        });
+    });
+}
+
+function openModal(modal) {
+    if (modal) {
+        modal.classList.remove('hidden');
+        // Close profile dropdown when opening modal
+        closeProfileDropdown();
+    }
+}
+
+function closeModal(modal) {
+    if (modal) modal.classList.add('hidden');
+}
+
+function updateProfileModal() {
+    const user = JSON.parse(localStorage.getItem('authState') || '{}');
+    document.getElementById('modalProfileName').textContent = user.name || 'User';
+    document.getElementById('modalProfileEmail').textContent = user.email || 'user@email.com';
+    
+    // Calculate member since date (demo)
+    const joinDate = new Date(user.createdAt || Date.now() - 90 * 24 * 60 * 60 * 1000);
+    document.getElementById('memberSince').textContent = joinDate.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short' 
+    });
+    
+    const searches = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+    document.getElementById('totalSearches').textContent = searches.length;
+}
+
+/* ===================================
+   EMERGENCY SOS BUTTON & DROPDOWN
+   =================================== */
+
+function initializeEmergencyButton() {
+    const emergencyBtn = document.getElementById('emergencyBtn');
+    const emergencyDropdown = document.getElementById('emergencyDropdown');
+    const profileDropdown = document.getElementById('profileDropdown');
+    
+    // Toggle emergency dropdown on button click
+    emergencyBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isHidden = emergencyDropdown.classList.contains('hidden');
+        
+        // Close profile dropdown
+        profileDropdown.classList.add('hidden');
+        
+        // Toggle emergency dropdown
+        if (isHidden) {
+            emergencyDropdown.classList.remove('hidden');
+        } else {
+            emergencyDropdown.classList.add('hidden');
+        }
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!emergencyBtn.contains(e.target) && !emergencyDropdown.contains(e.target)) {
+            emergencyDropdown.classList.add('hidden');
+        }
+    });
+    
+    // Close dropdown when item is clicked (for tel: links)
+    document.querySelectorAll('.emergency-item').forEach(item => {
+        item.addEventListener('click', () => {
+            setTimeout(() => {
+                emergencyDropdown.classList.add('hidden');
+            }, 500);
+        });
+    });
+}
+
+function closeProfileDropdown() {
+    const profileDropdown = document.getElementById('profileDropdown');
+    if (profileDropdown) profileDropdown.classList.add('hidden');
+}
+
+/* ===================================
    INITIALIZE ALL UI FEATURES
    =================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeDarkMode();
+    initializeEmergencyButton();
+    initializeModals();
     updateSearchHistoryUI();
     updateFavoritesUI();
     setupFavoritesButton();
     
-    console.log('✓ UI features initialized (Dark Mode, Toasts, History, Favorites)');
+    console.log('✓ UI features initialized (Dark Mode, Emergency SOS, Toasts, History, Favorites, Modals)');
 });
