@@ -3,11 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FloodAlert</title>
+    <title>Flood Detection System</title>
+    <!-- Leaflet.js Map Library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <!-- Google Sign-In -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- Custom Styles -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="app"></div>
+    <!-- Authentication Modal -->
+    <div id="authModal" class="auth-modal">
+        <div class="auth-container">
+            <button class="close-auth" id="closeAuthBtn">×</button>
+            <h2 class="auth-title">Flood Detection System</h2>
+            <p class="auth-subtitle">Login to access flood risk analysis</p>
+            
+            <!-- Login Form -->
+            <form id="loginForm" class="login-form">
+                <input 
+                    type="email" 
+                    id="emailInput" 
+                    placeholder="Enter your email" 
+                    required
+                    class="auth-input"
+                >
+                <input 
+                    type="password" 
+                    id="passwordInput" 
+                    placeholder="Enter your password" 
+                    required
+                    class="auth-input"
+                >
+                <button type="submit" class="auth-btn">Login with Email</button>
+            </form>
+            
+            <div class="auth-divider">OR</div>
+            
+            <!-- Google Sign-In -->
+            <div id="googleSignInBtn" class="google-signin"></div>
+            
+            <p class="auth-footer">Demo: Use any email/password to continue</p>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1 class="title">🌊 Flood Detection System</h1>
+                <p class="subtitle">Real-time flood risk assessment for your location</p>
+            </div>
+            <div class="header-right">
+                <button id="profileBtn" class="profile-btn" title="User Profile">
+                    <span id="userInitial">👤</span>
+                    <span id="userName">Profile</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- User Profile Dropdown -->
+    <div id="profileDropdown" class="profile-dropdown hidden">
+        <div class="profile-header">
+            <div class="profile-avatar" id="profileAvatar">👤</div>
+            <div class="profile-info">
+                <h4 id="profileName">User Name</h4>
+                <p id="profileEmail">user@email.com</p>
+            </div>
+        </div>
+        <div class="profile-divider"></div>
+        <button id="profileLink" class="profile-menu-item">📋 My Profile</button>
+        <button id="settingsLink" class="profile-menu-item">⚙️ Settings</button>
+        <button id="logoutBtn" class="profile-menu-item logout">🚪 Logout</button>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <!-- Search Section -->
+            <div class="search-section">
+                <h2 class="section-title">Search Location</h2>
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    class="search-input" 
+                    placeholder="Enter city or coordinates..."
+                    aria-label="Search for a location"
+                >
+                <button id="detectBtn" class="btn-primary">Detect Flood Risk</button>
+            </div>
+
+            <!-- Legend Section -->
+            <div class="legend-section">
+                <h2 class="section-title">Risk Levels</h2>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #d32f2f;"></div>
+                        <span>High Risk</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #ff9800;"></div>
+                        <span>Medium Risk</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #4caf50;"></div>
+                        <span>Low Risk</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Info Card (Floating) -->
+            <div id="infoCard" class="info-card">
+                <button class="close-btn" id="closeInfoCard">×</button>
+                <h3 id="infoLocation">Select a Location</h3>
+                <div class="info-details">
+                    <p><strong>Latitude:</strong> <span id="infoLat">20.5937</span></p>
+                    <p><strong>Longitude:</strong> <span id="infoLon">78.9629</span></p>
+                    <p><strong>Risk Status:</strong> <span id="infoRisk">Scanning...</span></p>
+                </div>
+            </div>
+
+            <!-- Loader (Hidden by default) -->
+            <div id="loader" class="loader hidden">
+                <div class="spinner"></div>
+                <p>Analyzing flood data...</p>
+            </div>
+
+            <!-- Map Container -->
+            <div id="map" class="map-container"></div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 Flood Detection System | Authenticated User | <span id="lastUpdate">Last Updated: Just now</span></p>
+    </footer>
+
+    <!-- Custom Scripts -->
     <script src="app.js"></script>
+    <script src="auth.js"></script>
 </body>
 </html>
