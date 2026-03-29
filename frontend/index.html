@@ -164,6 +164,16 @@
                 <p>Analyzing flood data...</p>
             </div>
 
+            <!-- Floating Control Panel -->
+            <div class="floating-controls">
+                <button class="control-btn" id="mapStyleBtn" title="Map Style" data-style="street">🗺️</button>
+                <button class="control-btn" id="satelliteBtn" title="Satellite" data-style="satellite">🛰️</button>
+                <button class="control-btn" id="darkMapBtn" title="Dark Map" data-style="dark">🌑</button>
+                <div class="control-divider"></div>
+                <button class="control-btn" id="zoomInBtn" title="Zoom In">➕</button>
+                <button class="control-btn" id="zoomOutBtn" title="Zoom Out">➖</button>
+            </div>
+
             <!-- Map Container -->
             <div id="map" class="map-container"></div>
         </main>
@@ -176,6 +186,7 @@
 
     <script src="auth.js"></script>
     <script src="ui.js"></script>
+    <script src="markers.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

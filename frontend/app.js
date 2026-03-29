@@ -73,18 +73,14 @@ function initializeMap() {
         5
     );
 
-    // Add Tile Layer (OpenStreetMap)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 19,
-        minZoom: 2
-    }).addTo(map);
+    // Initialize map styles and controls
+    initializeMapStyle();
 
     // Add Demo Flood Overlays
     addFloodOverlays();
 
-    // Add Default Marker
-    addMarker(currentLocation.lat, currentLocation.lng, 'Current Location');
+    // Add Default Marker with custom styling
+    addCustomMarker(currentLocation.lat, currentLocation.lng, 'current', 'India Center');
 
     console.log('✓ Map initialized with coordinates:', currentLocation);
 }
@@ -127,19 +123,20 @@ function addMarker(lat, lng, title = 'Location') {
         }
     });
 
-    // Add new marker
-    const marker = L.marker([lat, lng], {
-        icon: L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
-            shadowSize: [41, 41]
-        })
-    }).addTo(map);
+    // Determine marker type based on risk
+    const riskData = assessFloodRisk(lat, lng);
+    let markerType = 'current';
+    
+    if (riskData.risk === 'HIGH') {
+        markerType = 'flood';
+    } else if (riskData.risk === 'MEDIUM') {
+        markerType = 'search';
+    } else if (riskData.risk === 'SAFE') {
+        markerType = 'safe';
+    }
 
-    marker.bindPopup(title).openPopup();
+    // Add custom marker
+    addCustomMarker(lat, lng, markerType, title);
     map.setView([lat, lng], map.getZoom());
 
     console.log(`✓ Marker added at ${lat}, ${lng}`);
