@@ -52,8 +52,13 @@
     <header class="header">
         <div class="header-content">
             <div class="header-left">
-                <h1 class="title">🌊 Flood Detection System</h1>
-                <p class="subtitle">Real-time flood risk assessment for your location</p>
+                <div class="logo-section">
+                    <div class="logo">💧</div>
+                    <div class="branding">
+                        <h1 class="title">FloodAlert</h1>
+                        <p class="tagline">Real-time Risk Analysis System</p>
+                    </div>
+                </div>
             </div>
             <div class="header-right">
                 <button id="darkModeBtn" class="theme-toggle" title="Toggle Dark Mode">🌙</button>
@@ -79,9 +84,140 @@
         </div>
         <div class="profile-divider"></div>
         <button id="darkModeMenuBtn" class="profile-menu-item">🌙 Dark Mode</button>
-        <button id="profileLink" class="profile-menu-item">📋 My Profile</button>
-        <button id="settingsLink" class="profile-menu-item">⚙️ Settings</button>
+        <button id="profileLink" class="profile-menu-item" data-modal="profile">📋 My Profile</button>
+        <button id="settingsLink" class="profile-menu-item" data-modal="settings">⚙️ Settings</button>
+        <button id="helpLink" class="profile-menu-item" data-modal="help">❓ Help & Support</button>
+        <button id="aboutLink" class="profile-menu-item" data-modal="about">ℹ️ About</button>
+        <div class="profile-divider"></div>
         <button id="logoutBtn" class="profile-menu-item logout">🚪 Logout</button>
+    </div>
+
+    <!-- Modal Pages -->
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📋 My Profile</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="profile-section">
+                    <div class="profile-large-avatar" id="profileLargeAvatar">👤</div>
+                    <div class="profile-details">
+                        <p><strong>Name:</strong> <span id="modalProfileName">John Doe</span></p>
+                        <p><strong>Email:</strong> <span id="modalProfileEmail">john@example.com</span></p>
+                        <p><strong>Member Since:</strong> <span id="memberSince">Jan 2024</span></p>
+                        <p><strong>Total Searches:</strong> <span id="totalSearches">0</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ Settings</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-group">
+                    <label class="setting-item">
+                        <input type="checkbox" id="notificationToggle" checked>
+                        <span>Enable Notifications</span>
+                    </label>
+                    <label class="setting-item">
+                        <input type="checkbox" id="soundToggle" checked>
+                        <span>Alert Sounds</span>
+                    </label>
+                    <label class="setting-item">
+                        <input type="checkbox" id="darkModeToggle">
+                        <span>Dark Mode</span>
+                    </label>
+                </div>
+                <div class="settings-group">
+                    <h3>Alert Preferences</h3>
+                    <label class="setting-item">
+                        <input type="radio" name="alertLevel" value="all" checked>
+                        <span>All Risk Levels</span>
+                    </label>
+                    <label class="setting-item">
+                        <input type="radio" name="alertLevel" value="medium">
+                        <span>Medium & High Only</span>
+                    </label>
+                    <label class="setting-item">
+                        <input type="radio" name="alertLevel" value="high">
+                        <span>High Risk Only</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help & Support Modal -->
+    <div id="helpModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>❓ Help & Support</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="help-section">
+                    <h3>How to Use</h3>
+                    <ul>
+                        <li>Enter a city name or coordinates in the search box</li>
+                        <li>Click "Detect Flood Risk" to analyze</li>
+                        <li>View results on the map with color-coded markers</li>
+                        <li>Save locations to favorites for quick access</li>
+                    </ul>
+                </div>
+                <div class="help-section">
+                    <h3>Risk Levels</h3>
+                    <p><strong>🔴 High Risk:</strong> Severe flood danger - Evacuate if instructed</p>
+                    <p><strong>🟠 Medium Risk:</strong> Moderate danger - Stay alert and prepare</p>
+                    <p><strong>🟢 Low Risk:</strong> Minimal threat - Monitor updates</p>
+                </div>
+                <div class="help-section">
+                    <h3>Contact Support</h3>
+                    <p>Email: support@floodalert.com</p>
+                    <p>Phone: 1-800-FLOOD-911</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Modal -->
+    <div id="aboutModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>ℹ️ About FloodAlert</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="about-section">
+                    <h3>Version 1.0.0</h3>
+                    <p>FloodAlert is a real-time flood detection and risk assessment system powered by advanced AI and satellite data.</p>
+                </div>
+                <div class="about-section">
+                    <h3>Features</h3>
+                    <ul>
+                        <li>Real-time flood risk analysis</li>
+                        <li>Interactive satellite and street maps</li>
+                        <li>Weather integration</li>
+                        <li>Saved favorites and search history</li>
+                        <li>Dark mode support</li>
+                    </ul>
+                </div>
+                <div class="about-section">
+                    <h3>Data Sources</h3>
+                    <p>OpenWeatherMap, USGS, Satellite Imagery, Government Surveys</p>
+                </div>
+                <div class="about-section">
+                    <p style="font-size: 0.9rem; color: var(--text-secondary);">© 2026 FloodAlert. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Main Container -->
@@ -133,6 +269,41 @@
                     <div class="legend-item">
                         <div class="legend-color" style="background-color: #4caf50;"></div>
                         <span>Low Risk</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Contacts Section -->
+            <div class="emergency-section">
+                <h2 class="section-title">🚨 Emergency Contacts</h2>
+                <div class="emergency-contacts">
+                    <div class="emergency-contact">
+                        <span class="emergency-icon">🚑</span>
+                        <div class="contact-info">
+                            <p class="contact-label">Ambulance</p>
+                            <p class="contact-number">102</p>
+                        </div>
+                    </div>
+                    <div class="emergency-contact">
+                        <span class="emergency-icon">🚔</span>
+                        <div class="contact-info">
+                            <p class="contact-label">Police</p>
+                            <p class="contact-number">100</p>
+                        </div>
+                    </div>
+                    <div class="emergency-contact">
+                        <span class="emergency-icon">🚒</span>
+                        <div class="contact-info">
+                            <p class="contact-label">Fire Dept</p>
+                            <p class="contact-number">101</p>
+                        </div>
+                    </div>
+                    <div class="emergency-contact">
+                        <span class="emergency-icon">☎️</span>
+                        <div class="contact-info">
+                            <p class="contact-label">Disaster Mgmt</p>
+                            <p class="contact-number">1070</p>
+                        </div>
                     </div>
                 </div>
             </div>
