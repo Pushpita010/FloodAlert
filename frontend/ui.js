@@ -1,0 +1,284 @@
+/* ===================================
+   UI/UX Enhancements
+   Dark Mode, Toasts, Search History, Favorites
+   =================================== */
+
+// Theme State
+let uiState = {
+    darkMode: localStorage.getItem('darkMode') === 'true',
+    searchHistory: JSON.parse(localStorage.getItem('searchHistory')) || [],
+    favorites: JSON.parse(localStorage.getItem('favorites')) || []
+};
+
+/* ===================================
+   DARK MODE TOGGLE
+   =================================== */
+
+function initializeDarkMode() {
+    if (uiState.darkMode) {
+        enableDarkMode();
+    }
+    
+    document.getElementById('darkModeBtn').addEventListener('click', toggleDarkMode);
+    document.getElementById('darkModeMenuBtn').addEventListener('click', () => {
+        toggleDarkMode();
+        closeProfileDropdown();
+    });
+}
+
+function toggleDarkMode() {
+    uiState.darkMode = !uiState.darkMode;
+    localStorage.setItem('darkMode', uiState.darkMode);
+    
+    if (uiState.darkMode) {
+        enableDarkMode();
+    } else {
+        disableDarkMode();
+    }
+}
+
+function enableDarkMode() {
+    document.documentElement.style.setProperty('--bg-primary', '#1a1a1a');
+    document.documentElement.style.setProperty('--bg-secondary', '#2d2d2d');
+    document.documentElement.style.setProperty('--text-primary', '#e0e0e0');
+    document.documentElement.style.setProperty('--text-secondary', '#b0b0b0');
+    document.body.classList.add('dark-mode');
+    document.getElementById('darkModeBtn').textContent = '☀️';
+    document.getElementById('darkModeMenuBtn').textContent = '☀️ Light Mode';
+    showToast('🌙 Dark mode enabled', 'info');
+}
+
+function disableDarkMode() {
+    document.documentElement.style.setProperty('--bg-primary', '#ffffff');
+    document.documentElement.style.setProperty('--bg-secondary', '#f5f5f5');
+    document.documentElement.style.setProperty('--text-primary', '#333333');
+    document.documentElement.style.setProperty('--text-secondary', '#666666');
+    document.body.classList.remove('dark-mode');
+    document.getElementById('darkModeBtn').textContent = '🌙';
+    document.getElementById('darkModeMenuBtn').textContent = '🌙 Dark Mode';
+    showToast('☀️ Light mode enabled', 'info');
+}
+
+/* ===================================
+   TOAST NOTIFICATIONS
+   =================================== */
+
+function showToast(message, type = 'success') {
+    const toastContainer = document.getElementById('toastContainer');
+    
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    
+    // Set emoji based on type
+    const icons = {
+        success: '✓',
+        error: '✕',
+        warning: '⚠',
+        info: 'ℹ'
+    };
+    
+    toast.innerHTML = `
+        <span class="toast-icon">${icons[type] || '•'}</span>
+        <span class="toast-message">${message}</span>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+/* ===================================
+   SEARCH HISTORY
+   =================================== */
+
+function addToSearchHistory(searchTerm) {
+    // Avoid duplicates - move to front if exists
+    uiState.searchHistory = uiState.searchHistory.filter(item => item !== searchTerm);
+    uiState.searchHistory.unshift(searchTerm);
+    
+    // Keep only last 10
+    if (uiState.searchHistory.length > 10) {
+        uiState.searchHistory.pop();
+    }
+    
+    localStorage.setItem('searchHistory', JSON.stringify(uiState.searchHistory));
+    updateSearchHistoryUI();
+}
+
+function updateSearchHistoryUI() {
+    const historyList = document.getElementById('searchHistoryList');
+    const recentSearchesDiv = document.getElementById('recentSearches');
+    
+    if (uiState.searchHistory.length === 0) {
+        recentSearchesDiv.classList.add('hidden');
+        return;
+    }
+    
+    recentSearchesDiv.classList.remove('hidden');
+    historyList.innerHTML = '';
+    
+    uiState.searchHistory.forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = 'history-item';
+        btn.textContent = '🕐 ' + item;
+        btn.addEventListener('click', () => {
+            document.getElementById('searchInput').value = item;
+            document.getElementById('detectBtn').click();
+        });
+        historyList.appendChild(btn);
+    });
+}
+
+/* ===================================
+   FAVORITES/BOOKMARKS
+   =================================== */
+
+function addToFavorites(location) {
+    // location = { name, lat, lng, risk }
+    const exists = uiState.favorites.some(fav => 
+        fav.lat === location.lat && fav.lng === location.lng
+    );
+    
+    if (exists) {
+        showToast('❤️ Already in favorites!', 'warning');
+        return;
+    }
+    
+    uiState.favorites.push({
+        ...location,
+        savedAt: new Date().toLocaleString()
+    });
+    
+    localStorage.setItem('favorites', JSON.stringify(uiState.favorites));
+    updateFavoritesUI();
+    showToast('❤️ Added to favorites!', 'success');
+}
+
+function removeFromFavorites(lat, lng) {
+    uiState.favorites = uiState.favorites.filter(fav => 
+        !(fav.lat === lat && fav.lng === lng)
+    );
+    localStorage.setItem('favorites', JSON.stringify(uiState.favorites));
+    updateFavoritesUI();
+    showToast('💔 Removed from favorites', 'info');
+}
+
+function updateFavoritesUI() {
+    const favoritesList = document.getElementById('favoritesList');
+    
+    if (uiState.favorites.length === 0) {
+        favoritesList.innerHTML = '<p class="empty-state">No saved locations yet</p>';
+        return;
+    }
+    
+    favoritesList.innerHTML = '';
+    
+    uiState.favorites.forEach(fav => {
+        const favItem = document.createElement('div');
+        favItem.className = 'favorite-item';
+        
+        const riskColor = getRiskColor(fav.risk);
+        
+        favItem.innerHTML = `
+            <div class="fav-info">
+                <strong>${fav.name}</strong><br>
+                <small>${fav.lat.toFixed(2)}, ${fav.lng.toFixed(2)}</small>
+            </div>
+            <div class="fav-risk" style="background-color: ${riskColor}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">
+                ${fav.risk}
+            </div>
+            <button class="fav-btn-remove" data-lat="${fav.lat}" data-lng="${fav.lng}">✕</button>
+        `;
+        
+        favItem.querySelector('.fav-btn-remove').addEventListener('click', (e) => {
+            removeFromFavorites(parseFloat(e.target.dataset.lat), parseFloat(e.target.dataset.lng));
+        });
+        
+        // Click to navigate
+        favItem.querySelector('.fav-info').addEventListener('click', () => {
+            document.getElementById('searchInput').value = fav.name;
+            document.getElementById('detectBtn').click();
+        });
+        
+        favoritesList.appendChild(favItem);
+    });
+}
+
+/* ===================================
+   RISK STATISTICS DASHBOARD
+   =================================== */
+
+function updateRiskStats(location, riskData) {
+    const statsCard = document.getElementById('statsCard');
+    
+    // Calculate risk percentage (demo)
+    const riskPercent = {
+        'HIGH': 85,
+        'MEDIUM': 55,
+        'LOW': 25,
+        'SAFE': 10
+    }[riskData.risk] || 0;
+    
+    // Calculate demo flood height based on risk
+    const floodHeight = {
+        'HIGH': (5 + Math.random() * 3).toFixed(1),
+        'MEDIUM': (2 + Math.random() * 2).toFixed(1),
+        'LOW': (0 + Math.random() * 1).toFixed(1),
+        'SAFE': 0
+    }[riskData.risk] || 0;
+    
+    // Update stats
+    document.getElementById('overallRisk').textContent = riskPercent + '%';
+    document.getElementById('overallRisk').style.color = riskData.color;
+    document.getElementById('floodHeight').textContent = floodHeight + ' m';
+    document.getElementById('statsTime').textContent = new Date().toLocaleTimeString();
+    
+    // Store current location for favorites button
+    window.currentLocationForFav = {
+        name: location,
+        lat: currentLocation.lat,
+        lng: currentLocation.lng,
+        risk: riskData.risk
+    };
+    
+    statsCard.classList.remove('hidden');
+}
+
+function setupFavoritesButton() {
+    document.getElementById('addToFavBtn').addEventListener('click', () => {
+        if (window.currentLocationForFav) {
+            addToFavorites(window.currentLocationForFav);
+        }
+    });
+}
+
+/* ===================================
+   UTILITY FUNCTIONS
+   =================================== */
+
+function getRiskColor(risk) {
+    const colors = {
+        'HIGH': '#d32f2f',
+        'MEDIUM': '#ff9800',
+        'LOW': '#4caf50',
+        'SAFE': '#4caf50'
+    };
+    return colors[risk] || '#666';
+}
+
+/* ===================================
+   INITIALIZE ALL UI FEATURES
+   =================================== */
+
+document.addEventListener('DOMContentLoaded', () => {
+    initializeDarkMode();
+    updateSearchHistoryUI();
+    updateFavoritesUI();
+    setupFavoritesButton();
+    
+    console.log('✓ UI features initialized (Dark Mode, Toasts, History, Favorites)');
+});

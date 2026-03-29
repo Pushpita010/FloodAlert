@@ -56,6 +56,7 @@
                 <p class="subtitle">Real-time flood risk assessment for your location</p>
             </div>
             <div class="header-right">
+                <button id="darkModeBtn" class="theme-toggle" title="Toggle Dark Mode">🌙</button>
                 <button id="profileBtn" class="profile-btn" title="User Profile">
                     <span id="userInitial">👤</span>
                     <span id="userName">Profile</span>
@@ -63,6 +64,9 @@
             </div>
         </div>
     </header>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container"></div>
 
     <!-- User Profile Dropdown -->
     <div id="profileDropdown" class="profile-dropdown hidden">
@@ -74,6 +78,7 @@
             </div>
         </div>
         <div class="profile-divider"></div>
+        <button id="darkModeMenuBtn" class="profile-menu-item">🌙 Dark Mode</button>
         <button id="profileLink" class="profile-menu-item">📋 My Profile</button>
         <button id="settingsLink" class="profile-menu-item">⚙️ Settings</button>
         <button id="logoutBtn" class="profile-menu-item logout">🚪 Logout</button>
@@ -83,17 +88,34 @@
     <div class="container">
         <!-- Sidebar -->
         <aside class="sidebar">
-            <!-- Search Section -->
+            <!-- Search Section with History -->
             <div class="search-section">
                 <h2 class="section-title">Search Location</h2>
-                <input 
-                    type="text" 
-                    id="searchInput" 
-                    class="search-input" 
-                    placeholder="Enter city or coordinates..."
-                    aria-label="Search for a location"
-                >
-                <button id="detectBtn" class="btn-primary">Detect Flood Risk</button>
+                <div class="search-box">
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        class="search-input" 
+                        placeholder="Enter city or coordinates..."
+                        aria-label="Search for a location"
+                        autocomplete="off"
+                    >
+                    <button id="detectBtn" class="btn-primary">Detect Flood Risk</button>
+                </div>
+                
+                <!-- Recent Searches -->
+                <div id="recentSearches" class="recent-searches hidden">
+                    <p class="recent-title">📍 Recent Searches:</p>
+                    <div id="searchHistoryList" class="search-history-list"></div>
+                </div>
+            </div>
+
+            <!-- Favorites Section -->
+            <div class="favorites-section">
+                <h2 class="section-title">❤️ Favorites</h2>
+                <div id="favoritesList" class="favorites-list">
+                    <p class="empty-state">No saved locations yet</p>
+                </div>
             </div>
 
             <!-- Legend Section -->
@@ -118,15 +140,22 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Info Card (Floating) -->
-            <div id="infoCard" class="info-card">
-                <button class="close-btn" id="closeInfoCard">×</button>
-                <h3 id="infoLocation">Select a Location</h3>
-                <div class="info-details">
-                    <p><strong>Latitude:</strong> <span id="infoLat">20.5937</span></p>
-                    <p><strong>Longitude:</strong> <span id="infoLon">78.9629</span></p>
-                    <p><strong>Risk Status:</strong> <span id="infoRisk">Scanning...</span></p>
+            <!-- Risk Statistics Dashboard -->
+            <div id="statsCard" class="stats-card hidden">
+                <h3>📊 Risk Analysis</h3>
+                <div class="stat-item">
+                    <span>Overall Risk:</span>
+                    <span id="overallRisk" class="risk-badge">--</span>
                 </div>
+                <div class="stat-item">
+                    <span>Flood Height:</span>
+                    <span id="floodHeight">-- m</span>
+                </div>
+                <div class="stat-item">
+                    <span>Last Updated:</span>
+                    <span id="statsTime">--</span>
+                </div>
+                <button id="addToFavBtn" class="btn-secondary">❤️ Add to Favorites</button>
             </div>
 
             <!-- Loader (Hidden by default) -->
@@ -145,8 +174,8 @@
         <p>&copy; 2026 Flood Detection System | Authenticated User | <span id="lastUpdate">Last Updated: Just now</span></p>
     </footer>
 
-    <!-- Custom Scripts -->
-    <script src="app.js"></script>
     <script src="auth.js"></script>
+    <script src="ui.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>

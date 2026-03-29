@@ -21,13 +21,25 @@
     --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
     --transition: all 0.3s ease;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f5f5;
+    --text-primary: #333333;
+    --text-secondary: #666666;
+}
+
+body.dark-mode {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --text-primary: #e0e0e0;
+    --text-secondary: #b0b0b0;
 }
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #ecf0f1;
-    color: #333;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
     line-height: 1.6;
+    transition: var(--transition);
 }
 
 /* ===================================
@@ -628,6 +640,394 @@ body {
 .loader p {
     color: var(--primary-blue);
     font-weight: 500;
+}
+
+/* ===================================
+   TOAST NOTIFICATIONS
+   =================================== */
+
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    animation: slideInToast 0.3s ease;
+    font-weight: 500;
+}
+
+@keyframes slideInToast {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.toast.fade-out {
+    animation: slideOutToast 0.3s ease;
+}
+
+@keyframes slideOutToast {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+}
+
+.toast-success {
+    border-left: 4px solid var(--low-risk);
+    color: var(--low-risk);
+}
+
+.toast-error {
+    border-left: 4px solid var(--high-risk);
+    color: var(--high-risk);
+}
+
+.toast-warning {
+    border-left: 4px solid var(--medium-risk);
+    color: var(--medium-risk);
+}
+
+.toast-info {
+    border-left: 4px solid var(--primary-blue);
+    color: var(--primary-blue);
+}
+
+.toast-icon {
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+/* ===================================
+   DARK MODE TOGGLE BUTTON
+   =================================== */
+
+.theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: rotate(20deg);
+}
+
+/* ===================================
+   SEARCH HISTORY & FAVORITES
+   =================================== */
+
+.search-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.recent-searches {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.recent-searches.hidden {
+    display: none;
+}
+
+.recent-title {
+    font-size: 0.9rem;
+    color: #999;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.search-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.history-item {
+    background: #f5f5f5;
+    border: 1px solid #e0e0e0;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-align: left;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+    color: #666;
+}
+
+.history-item:hover {
+    background: var(--primary-blue);
+    color: white;
+    border-color: var(--primary-blue);
+}
+
+/* ===================================
+   FAVORITES SECTION
+   =================================== */
+
+.favorites-section {
+    background: white;
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+.empty-state {
+    color: #999;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 20px 10px;
+}
+
+.favorites-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.favorite-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: #f9f9f9;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.favorite-item:hover {
+    border-color: var(--primary-blue);
+    background: #f0f5ff;
+    transform: translateX(4px);
+}
+
+.fav-info {
+    flex: 1;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.fav-info strong {
+    color: var(--dark-blue);
+}
+
+.fav-info small {
+    color: #999;
+}
+
+.fav-risk {
+    font-weight: 600;
+    font-size: 0.75rem !important;
+    text-align: center;
+    min-width: 50px;
+}
+
+.fav-btn-remove {
+    background: #f0f0f0;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-weight: bold;
+    color: #d32f2f;
+    transition: var(--transition);
+}
+
+.fav-btn-remove:hover {
+    background: #d32f2f;
+    color: white;
+}
+
+/* ===================================
+   RISK STATISTICS DASHBOARD
+   =================================== */
+
+.stats-card {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 280px;
+    background: white;
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    z-index: 400;
+    animation: slideInRight 0.3s ease;
+    border-top: 4px solid var(--primary-blue);
+}
+
+.stats-card.hidden {
+    display: none;
+}
+
+.stats-card h3 {
+    color: var(--dark-blue);
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--secondary-blue);
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    font-size: 0.95rem;
+    color: #555;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.stat-item span:last-child {
+    font-weight: 600;
+    color: var(--primary-blue);
+}
+
+.risk-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    background: #e3f2fd;
+    color: var(--primary-blue) !important;
+}
+
+.btn-secondary {
+    width: 100%;
+    padding: 10px;
+    margin-top: 15px;
+    background: #f5f5f5;
+    color: var(--primary-blue);
+    border: 2px solid var(--primary-blue);
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-secondary:hover {
+    background: var(--primary-blue);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* ===================================
+   DARK MODE STYLES FOR CARDS
+   =================================== */
+
+body.dark-mode .search-section,
+body.dark-mode .legend-section,
+body.dark-mode .favorites-section {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid #444;
+}
+
+body.dark-mode .search-input,
+body.dark-mode .history-item {
+    background: #1a1a1a;
+    color: var(--text-primary);
+    border-color: #444;
+}
+
+body.dark-mode .history-item:hover {
+    background: var(--primary-blue);
+    color: white;
+}
+
+body.dark-mode .section-title {
+    color: var(--secondary-blue);
+}
+
+body.dark-mode .stats-card,
+body.dark-mode .info-card {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+body.dark-mode .toast {
+    background: var(--bg-secondary);
+}
+
+body.dark-mode .favorite-item {
+    background: #2d2d2d;
+    border-color: #444;
+    color: var(--text-primary);
+}
+
+body.dark-mode .favorite-item:hover {
+    background: #3a3a3a;
+    border-color: var(--primary-blue);
+}
+
+body.dark-mode .fav-info strong {
+    color: var(--secondary-blue);
+}
+
+/* ===================================
+   RESPONSIVE - TOAST NOTIFICATIONS
+   =================================== */
+
+@media (max-width: 480px) {
+    .toast-container {
+        left: 10px;
+        right: 10px;
+        top: 60px;
+    }
+
+    .toast {
+        width: 100%;
+    }
+
+    .stats-card,
+    .info-card {
+        position: static;
+        width: 100%;
+        margin-top: 10px;
+        z-index: 1;
+    }
+
+    .favorites-list {
+        max-height: 250px;
+    }
 }
 
 /* ===================================

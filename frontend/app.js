@@ -228,7 +228,6 @@ function hideLoader() {
 function addEventListeners() {
     const searchInput = document.getElementById('searchInput');
     const detectBtn = document.getElementById('detectBtn');
-    const closeInfoCardBtn = document.getElementById('closeInfoCard');
     const mapElement = document.getElementById('map');
 
     // Search Input - Real-time validation
@@ -244,18 +243,15 @@ function addEventListeners() {
     // Detect Button - Process search
     detectBtn.addEventListener('click', handleDetectClick);
 
-    // Close Info Card
-    closeInfoCardBtn.addEventListener('click', () => {
-        document.getElementById('infoCard').style.display = 'none';
-    });
-
-    // Map Click - Update location and info
+    // Map Click - Update location and risk stats
     map.on('click', (e) => {
         const { lat, lng } = e.latlng;
         currentLocation = { lat, lng };
         addMarker(lat, lng, 'Clicked Location');
-        updateInfoCard(lat, lng, 'Map Location');
-        document.getElementById('infoCard').style.display = 'block';
+        const riskData = assessFloodRisk(lat, lng);
+        updateRiskStats('Map Click', riskData);
+        addToSearchHistory(lat.toFixed(2) + ', ' + lng.toFixed(2));
+        showToast('✓ Location updated', 'success');
         console.log('✓ Map clicked at:', { lat, lng });
     });
 
@@ -282,7 +278,10 @@ function handleDetectClick() {
                 const lng = parseFloat(coordMatch[2]);
                 currentLocation = { lat, lng };
                 addMarker(lat, lng, searchInput);
-                updateInfoCard(lat, lng, 'Search: ' + searchInput);
+                const riskData = assessFloodRisk(lat, lng);
+                updateRiskStats(searchInput, riskData);
+                addToSearchHistory(searchInput);
+                showToast('✓ Location detected: ' + searchInput, 'success');
             } else {
                 // Example cities mapping (demo purposes)
                 const cityLocations = {
@@ -299,20 +298,23 @@ function handleDetectClick() {
                     const city = cityLocations[cityKey];
                     currentLocation = { lat: city.lat, lng: city.lng };
                     addMarker(city.lat, city.lng, city.name);
-                    updateInfoCard(city.lat, city.lng, city.name);
+                    const riskData = assessFloodRisk(city.lat, city.lng);
+                    updateRiskStats(city.name, riskData);
+                    addToSearchHistory(city.name);
+                    showToast('✓ ' + city.name + ' detected!', 'success');
                 } else {
-                    alert('Location not found. Try: Delhi, Mumbai, Bangalore, or enter coordinates (lat,lng)');
+                    showToast('✕ Location not found. Try: Delhi, Mumbai, Bangalore', 'error');
                     hideLoader();
                     return;
                 }
             }
         } else {
             // Detect current (default) location
-            updateInfoCard(currentLocation.lat, currentLocation.lng, 'Current Location');
+            const riskData = assessFloodRisk(currentLocation.lat, currentLocation.lng);
+            updateRiskStats('India Center', riskData);
+            showToast('✓ Analyzing current location...', 'info');
         }
 
-        // Show info card
-        document.getElementById('infoCard').style.display = 'block';
         hideLoader();
         updateLastUpdate();
 
