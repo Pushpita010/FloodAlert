@@ -62,6 +62,10 @@
             </div>
             <div class="header-right">
                 <button id="darkModeBtn" class="theme-toggle" title="Toggle Dark Mode">🌙</button>
+                <button id="safetyBtn" class="safety-tips-btn" title="Safety Instructions">
+                    <span class="safety-icon">🛟</span>
+                    <span class="safety-text">Safety</span>
+                </button>
                 <button id="emergencyBtn" class="emergency-sos-btn" title="Emergency Contacts">
                     <span class="sos-icon">🚨</span>
                     <span class="sos-text">SOS</span>
@@ -78,6 +82,104 @@
 
     <!-- Toast Notification Container -->
     <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Safety Instructions Dropdown -->
+    <div id="safetyDropdown" class="safety-dropdown hidden">
+        <div class="safety-dropdown-header">
+            <h3>🛟 Safety Instructions</h3>
+            <p>Prepare & Stay Safe During Floods</p>
+        </div>
+        <div class="safety-dropdown-divider"></div>
+        <div class="safety-content">
+            <!-- Before Flood -->
+            <div class="safety-section">
+                <h4 class="safety-subtitle">📋 Before a Flood</h4>
+                <ul class="safety-list">
+                    <li><strong>Emergency Kit:</strong> Keep water, first aid, flashlights, batteries</li>
+                    <li><strong>Documents:</strong> Store passports, IDs, insurance papers in waterproof bag</li>
+                    <li><strong>Medications:</strong> Stock 2-week supply + prescriptions</li>
+                    <li><strong>Cash:</strong> Keep emergency cash at home</li>
+                    <li><strong>Contact List:</strong> Write down emergency numbers</li>
+                    <li><strong>Plan Route:</strong> Know evacuation routes & safe zones</li>
+                </ul>
+            </div>
+
+            <!-- During Flood -->
+            <div class="safety-section">
+                <h4 class="safety-subtitle">⚠️ During a Flood</h4>
+                <ul class="safety-list">
+                    <li><strong>Move Up:</strong> Go to higher floors or roof immediately</li>
+                    <li><strong>Turn Off:</strong> Shut off gas & electricity if safe</li>
+                    <li><strong>Don't Drive:</strong> Never cross flooded roads (even shallow areas)</li>
+                    <li><strong>Stay Inside:</strong> Remain indoors away from windows</li>
+                    <li><strong>Listen Alert:</strong> Follow official radio/TV broadcasts</li>
+                    <li><strong>Help Others:</strong> Assist elderly & disabled neighbors if safe</li>
+                </ul>
+            </div>
+
+            <!-- Safe Shelter Locations -->
+            <div class="safety-section">
+                <h4 class="safety-subtitle">🏘️ Where to Take Shelter</h4>
+                <div class="shelter-locations">
+                    <div class="shelter-item">
+                        <span class="shelter-icon">🏫</span>
+                        <div class="shelter-info">
+                            <p class="shelter-name">Schools & Colleges</p>
+                            <p class="shelter-detail">Usually on higher ground, designed as evacuation centers</p>
+                        </div>
+                    </div>
+                    <div class="shelter-item">
+                        <span class="shelter-icon">🏥</span>
+                        <div class="shelter-info">
+                            <p class="shelter-name">Hospitals & Health Centers</p>
+                            <p class="shelter-detail">Medical support available, elevated locations</p>
+                        </div>
+                    </div>
+                    <div class="shelter-item">
+                        <span class="shelter-icon">⛪</span>
+                        <div class="shelter-info">
+                            <p class="shelter-name">Temples, Mosques, Churches</p>
+                            <p class="shelter-detail">Community shelters, often have supplies</p>
+                        </div>
+                    </div>
+                    <div class="shelter-item">
+                        <span class="shelter-icon">🏛️</span>
+                        <div class="shelter-info">
+                            <p class="shelter-name">Government Buildings</p>
+                            <p class="shelter-detail">Municipal offices, police stations, fire stations</p>
+                        </div>
+                    </div>
+                    <div class="shelter-item">
+                        <span class="shelter-icon">🏨</span>
+                        <div class="shelter-info">
+                            <p class="shelter-name">Hotels on Higher Ground</p>
+                            <p class="shelter-detail">Urban hotels often have emergency facilities</p>
+                        </div>
+                    </div>
+                    <div class="shelter-item">
+                        <span class="shelter-icon">🏞️</span>
+                        <div class="shelter-info">
+                            <p class="shelter-name">Higher Elevations</p>
+                            <p class="shelter-detail">Open spaces on hills, hilltops, elevated platforms</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- After Flood -->
+            <div class="safety-section">
+                <h4 class="safety-subtitle">✅ After Flood Recedes</h4>
+                <ul class="safety-list">
+                    <li><strong>Check Safety:</strong> Inspect home for structural damage</li>
+                    <li><strong>Boil Water:</strong> Use only boiled/bottled water for drinking</li>
+                    <li><strong>Clean Thoroughly:</strong> Disinfect affected areas with bleach</li>
+                    <li><strong>Dispose Safely:</strong> Remove contaminated items properly</li>
+                    <li><strong>Get Medical Check:</strong> Watch for disease symptoms</li>
+                    <li><strong>Report Damage:</strong> Contact insurance & local authorities</li>
+                </ul>
+            </div>
+        </div>
+    </div>
 
     <!-- Emergency Contacts Dropdown -->
     <div id="emergencyDropdown" class="emergency-dropdown hidden">

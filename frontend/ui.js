@@ -359,7 +359,26 @@ function updateProfileModal() {
 function initializeEmergencyButton() {
     const emergencyBtn = document.getElementById('emergencyBtn');
     const emergencyDropdown = document.getElementById('emergencyDropdown');
+    const safetyBtn = document.getElementById('safetyBtn');
+    const safetyDropdown = document.getElementById('safetyDropdown');
     const profileDropdown = document.getElementById('profileDropdown');
+    
+    // Toggle safety dropdown on button click
+    safetyBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isHidden = safetyDropdown.classList.contains('hidden');
+        
+        // Close other dropdowns
+        emergencyDropdown.classList.add('hidden');
+        profileDropdown.classList.add('hidden');
+        
+        // Toggle safety dropdown
+        if (isHidden) {
+            safetyDropdown.classList.remove('hidden');
+        } else {
+            safetyDropdown.classList.add('hidden');
+        }
+    });
     
     // Toggle emergency dropdown on button click
     emergencyBtn.addEventListener('click', (e) => {
@@ -368,6 +387,7 @@ function initializeEmergencyButton() {
         
         // Close profile dropdown
         profileDropdown.classList.add('hidden');
+        safetyDropdown.classList.add('hidden');
         
         // Toggle emergency dropdown
         if (isHidden) {
@@ -381,6 +401,9 @@ function initializeEmergencyButton() {
     document.addEventListener('click', (e) => {
         if (!emergencyBtn.contains(e.target) && !emergencyDropdown.contains(e.target)) {
             emergencyDropdown.classList.add('hidden');
+        }
+        if (!safetyBtn.contains(e.target) && !safetyDropdown.contains(e.target)) {
+            safetyDropdown.classList.add('hidden');
         }
     });
     
