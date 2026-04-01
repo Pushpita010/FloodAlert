@@ -92,6 +92,84 @@ function showToast(message, type = 'success') {
 }
 
 /* ===================================
+   RESULTS POPUP MODAL
+   =================================== */
+
+function showResultsPopup(place, latitude, longitude, floodRegions, regionSummary) {
+    // Create modal overlay
+    const modal = document.createElement('div');
+    modal.className = 'results-modal-overlay';
+    
+    // Create modal content
+    const modalContent = document.createElement('div');
+    modalContent.className = 'results-modal';
+    
+    // Build flood regions list
+    let regionsHTML = '<div class="regions-list">';
+    if (floodRegions && floodRegions.length > 0) {
+        floodRegions.forEach((region, index) => {
+            const severityColor = {
+                'high': '#dc2626',
+                'medium': '#ea580c',
+                'low': '#16a34a'
+            }[region.severity] || '#666';
+            
+            regionsHTML += `
+                <div class="region-item" style="border-left: 4px solid ${severityColor}">
+                    <div><strong>Region ${index + 1}</strong></div>
+                    <div>Severity: <span style="color: ${severityColor}; font-weight: bold;">${region.severity.toUpperCase()}</span></div>
+                    <div>Confidence: ${(region.confidence * 100).toFixed(0)}%</div>
+                    <div>Distance: ${region.distance_km.toFixed(1)} km</div>
+                </div>
+            `;
+        });
+    } else {
+        regionsHTML += '<p style="padding: 10px; color: #16a34a;">✓ No flood regions detected - Area is safe!</p>';
+    }
+    regionsHTML += '</div>';
+    
+    // Build summary
+    const summaryHTML = `
+        <div style="background: #f0f0f0; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
+            <strong>Summary:</strong><br>
+            🔴 High: ${regionSummary.high_risk} | 
+            🟡 Medium: ${regionSummary.medium_risk} | 
+            🟢 Low: ${regionSummary.low_risk}
+        </div>
+    `;
+    
+    modalContent.innerHTML = `
+        <div class="results-modal-header">
+            <h2>📍 Flood Detection Results</h2>
+            <button class="results-close-btn" onclick="this.closest('.results-modal-overlay').remove()">&times;</button>
+        </div>
+        <div class="results-modal-body">
+            <div class="results-info">
+                <p><strong>Location:</strong> ${place}</p>
+                <p><strong>Coordinates:</strong> ${latitude.toFixed(4)}°N, ${longitude.toFixed(4)}°E</p>
+                <p><strong>Total Regions:</strong> ${floodRegions.length}</p>
+            </div>
+            ${summaryHTML}
+            <h3>Detected Regions:</h3>
+            ${regionsHTML}
+        </div>
+    `;
+    
+    modal.appendChild(modalContent);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+    
+    document.body.appendChild(modal);
+}
+
+/* ===================================
+   TOAST NOTIFICATIONS (Original)
+   =================================== */
+
+function showToastOld(message, type = 'success') {
+
+/* ===================================
    SEARCH HISTORY
    =================================== */
 

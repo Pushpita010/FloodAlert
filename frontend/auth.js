@@ -243,6 +243,9 @@ function getAuthHeader() {
    =================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Load authentication state immediately (shows modal or initializes app)
+    loadAuthState();
+    
     // Email login form
     document.getElementById('loginForm').addEventListener('submit', (e) => {
         e.preventDefault();
