@@ -407,6 +407,9 @@ async function handleDetectClick() {
         // Display statistics
         displayRegionStats(data);
 
+        // Show results popup with coordinates and regions
+        showResultsPopup(data.place, data.latitude, data.longitude, data.flood_regions, data.region_summary);
+
         // Add to search history
         addToSearchHistory(data.place);
 

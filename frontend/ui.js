@@ -167,8 +167,6 @@ function showResultsPopup(place, latitude, longitude, floodRegions, regionSummar
    TOAST NOTIFICATIONS (Original)
    =================================== */
 
-function showToastOld(message, type = 'success') {
-
 /* ===================================
    SEARCH HISTORY
    =================================== */
