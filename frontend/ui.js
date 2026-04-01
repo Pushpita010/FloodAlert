@@ -221,15 +221,21 @@ function removeFromFavorites(lat, lng) {
 
 function updateFavoritesUI() {
     const favoritesList = document.getElementById('favoritesList');
+    const favoritesDropdownList = document.getElementById('favoritesDropdownList');
     
     if (uiState.favorites.length === 0) {
         favoritesList.innerHTML = '<p class="empty-state">No saved locations yet</p>';
+        if (favoritesDropdownList) {
+            favoritesDropdownList.innerHTML = '<p class="empty-state">No saved locations yet</p>';
+        }
         return;
     }
     
     favoritesList.innerHTML = '';
+    if (favoritesDropdownList) favoritesDropdownList.innerHTML = '';
     
     uiState.favorites.forEach(fav => {
+        // Update sidebar favorites list
         const favItem = document.createElement('div');
         favItem.className = 'favorite-item';
         
@@ -257,6 +263,33 @@ function updateFavoritesUI() {
         });
         
         favoritesList.appendChild(favItem);
+        
+        // Also update dropdown favorites list
+        if (favoritesDropdownList) {
+            const favDropdownItem = document.createElement('div');
+            favDropdownItem.className = 'favorites-item';
+            
+            favDropdownItem.innerHTML = `
+                <div style="flex: 1; cursor: pointer;" class="fav-search">
+                    <div style="font-weight: 500; color: var(--text-primary);">${fav.name}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">${fav.lat.toFixed(4)}, ${fav.lng.toFixed(4)}</div>
+                </div>
+                <button class="fav-dropdown-remove" data-lat="${fav.lat}" data-lng="${fav.lng}" style="background: none; border: none; color: #ff6b6b; cursor: pointer; font-size: 1.2rem; padding: 4px;">✕</button>
+            `;
+            
+            favDropdownItem.querySelector('.fav-search').addEventListener('click', () => {
+                document.getElementById('searchInput').value = fav.name;
+                document.getElementById('detectBtn').click();
+                document.getElementById('favoritesDropdown').classList.add('hidden');
+            });
+            
+            favDropdownItem.querySelector('.fav-dropdown-remove').addEventListener('click', (e) => {
+                e.stopPropagation();
+                removeFromFavorites(parseFloat(e.target.dataset.lat), parseFloat(e.target.dataset.lng));
+            });
+            
+            favoritesDropdownList.appendChild(favDropdownItem);
+        }
     });
 }
 
@@ -414,6 +447,28 @@ function initializeEmergencyButton() {
     const safetyBtn = document.getElementById('safetyBtn');
     const safetyDropdown = document.getElementById('safetyDropdown');
     const profileDropdown = document.getElementById('profileDropdown');
+    const favoritesBtn = document.getElementById('favoritesBtn');
+    const favoritesDropdown = document.getElementById('favoritesDropdown');
+    
+    // Toggle favorites dropdown on button click
+    if (favoritesBtn && favoritesDropdown) {
+        favoritesBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isHidden = favoritesDropdown.classList.contains('hidden');
+            
+            // Close other dropdowns
+            emergencyDropdown.classList.add('hidden');
+            profileDropdown.classList.add('hidden');
+            safetyDropdown.classList.add('hidden');
+            
+            // Toggle favorites dropdown
+            if (isHidden) {
+                favoritesDropdown.classList.remove('hidden');
+            } else {
+                favoritesDropdown.classList.add('hidden');
+            }
+        });
+    }
     
     // Toggle safety dropdown on button click
     safetyBtn.addEventListener('click', (e) => {
@@ -423,6 +478,7 @@ function initializeEmergencyButton() {
         // Close other dropdowns
         emergencyDropdown.classList.add('hidden');
         profileDropdown.classList.add('hidden');
+        if (favoritesDropdown) favoritesDropdown.classList.add('hidden');
         
         // Toggle safety dropdown
         if (isHidden) {
@@ -440,6 +496,7 @@ function initializeEmergencyButton() {
         // Close profile dropdown
         profileDropdown.classList.add('hidden');
         safetyDropdown.classList.add('hidden');
+        if (favoritesDropdown) favoritesDropdown.classList.add('hidden');
         
         // Toggle emergency dropdown
         if (isHidden) {
@@ -456,6 +513,9 @@ function initializeEmergencyButton() {
         }
         if (!safetyBtn.contains(e.target) && !safetyDropdown.contains(e.target)) {
             safetyDropdown.classList.add('hidden');
+        }
+        if (favoritesBtn && !favoritesBtn.contains(e.target) && !favoritesDropdown.contains(e.target)) {
+            favoritesDropdown.classList.add('hidden');
         }
     });
     

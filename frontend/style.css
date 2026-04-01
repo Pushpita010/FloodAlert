@@ -1568,6 +1568,7 @@ body {
    =================================== */
 
 .favorites-section {
+    display: none;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     padding: 24px;

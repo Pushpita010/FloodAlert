@@ -409,6 +409,9 @@ async function handleDetectClick() {
 
         // Show results popup with coordinates and regions
         showResultsPopup(data.place, data.latitude, data.longitude, data.flood_regions, data.region_summary);
+        
+        // Setup the Add to Favorites button
+        setupFavoritesButton();
 
         // Add to search history
         addToSearchHistory(data.place);

@@ -167,6 +167,21 @@ function updateProfileUI() {
 
 function toggleProfileDropdown() {
     const dropdown = document.getElementById('profileDropdown');
+    const favoritesDropdown = document.getElementById('favoritesDropdown');
+    const emergencyDropdown = document.getElementById('emergencyDropdown');
+    const safetyDropdown = document.getElementById('safetyDropdown');
+    
+    // Close other dropdowns
+    if (favoritesDropdown && !dropdown.classList.contains('hidden')) {
+        favoritesDropdown.classList.add('hidden');
+    }
+    if (!emergencyDropdown.classList.contains('hidden')) {
+        emergencyDropdown.classList.add('hidden');
+    }
+    if (!safetyDropdown.classList.contains('hidden')) {
+        safetyDropdown.classList.add('hidden');
+    }
+    
     dropdown.classList.toggle('hidden');
 }
 
