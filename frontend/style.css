@@ -2329,8 +2329,95 @@ body.dark-mode .leaflet-popup-tip {
 }
 
 /* ===================================
-   RESULTS POPUP MODAL STYLES
+   FAVORITES BUTTON IN HEADER
    =================================== */
+
+.favorites-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #ff4081 0%, #f50057 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: var(--transition);
+    box-shadow: 0 4px 12px rgba(245, 0, 87, 0.3);
+}
+
+.favorites-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(245, 0, 87, 0.4);
+}
+
+.favorites-icon {
+    font-size: 1.2rem;
+}
+
+/* ===================================
+   FAVORITES DROPDOWN
+   =================================== */
+
+.favorites-dropdown {
+    position: absolute;
+    top: 60px;
+    right: 150px;
+    background: var(--bg-primary);
+    border: 2px solid #ff4081;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    z-index: 9999 !important;
+    min-width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    animation: slideInFromTop 0.3s ease-out;
+}
+
+.favorites-dropdown.hidden {
+    display: none;
+}
+
+.favorites-dropdown-header {
+    background: linear-gradient(135deg, #ff4081 0%, #f50057 100%);
+    color: white;
+    padding: 15px;
+    border-radius: 10px 10px 0 0;
+}
+
+.favorites-dropdown-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.favorites-dropdown-divider {
+    height: 2px;
+    background: linear-gradient(90deg, #ff4081, transparent);
+}
+
+.favorites-dropdown-list {
+    padding: 10px;
+}
+
+.favorites-item {
+    padding: 12px;
+    margin: 8px 0;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+    border-left: 3px solid #ff4081;
+}
+
+.favorites-item:hover {
+    background: #ff4081;
+    color: white;
+    transform: translateX(5px);
+}
+
+
 
 .results-modal-overlay {
     position: fixed;
@@ -2342,7 +2429,7 @@ body.dark-mode .leaflet-popup-tip {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 10000;
+    z-index: 2147483647 !important;
     animation: fadeIn 0.3s ease-in-out;
 }
 
@@ -2355,6 +2442,8 @@ body.dark-mode .leaflet-popup-tip {
     max-height: 600px;
     overflow-y: auto;
     animation: slideInFromTop 0.3s ease-out;
+    position: relative;
+    z-index: 2147483647 !important;
 }
 
 .results-modal-header {
@@ -2365,6 +2454,8 @@ body.dark-mode .leaflet-popup-tip {
     justify-content: space-between;
     align-items: center;
     border-radius: 16px 16px 0 0;
+    position: relative;
+    z-index: 2147483647 !important;
 }
 
 .results-modal-header h2 {
@@ -2386,6 +2477,8 @@ body.dark-mode .leaflet-popup-tip {
     align-items: center;
     justify-content: center;
     transition: background 0.2s;
+    z-index: 2147483647 !important;
+    position: relative;
 }
 
 .results-close-btn:hover {
@@ -2395,6 +2488,8 @@ body.dark-mode .leaflet-popup-tip {
 .results-modal-body {
     padding: 25px;
     color: var(--text-primary);
+    position: relative;
+    z-index: 2147483647 !important;
 }
 
 .results-info {

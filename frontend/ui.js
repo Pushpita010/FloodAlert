@@ -96,16 +96,11 @@ function showToast(message, type = 'success') {
    =================================== */
 
 function showResultsPopup(place, latitude, longitude, floodRegions, regionSummary) {
-    // Create modal overlay
-    const modal = document.createElement('div');
-    modal.className = 'results-modal-overlay';
-    
-    // Create modal content
-    const modalContent = document.createElement('div');
-    modalContent.className = 'results-modal';
+    // Show stats card
+    document.getElementById('statsCard').classList.remove('hidden');
     
     // Build flood regions list
-    let regionsHTML = '<div class="regions-list">';
+    let regionsHTML = '<div class="regions-list" style="max-height: 300px; overflow-y: auto; margin-top: 15px;">';
     if (floodRegions && floodRegions.length > 0) {
         floodRegions.forEach((region, index) => {
             const severityColor = {
@@ -115,57 +110,38 @@ function showResultsPopup(place, latitude, longitude, floodRegions, regionSummar
             }[region.severity] || '#666';
             
             regionsHTML += `
-                <div class="region-item" style="border-left: 4px solid ${severityColor}">
+                <div style="background: #f0f0f0; padding: 10px; margin-bottom: 8px; border-radius: 6px; border-left: 4px solid ${severityColor}; font-size: 0.85rem;">
                     <div><strong>Region ${index + 1}</strong></div>
                     <div>Severity: <span style="color: ${severityColor}; font-weight: bold;">${region.severity.toUpperCase()}</span></div>
                     <div>Confidence: ${(region.confidence * 100).toFixed(0)}%</div>
-                    <div>Distance: ${region.distance_km.toFixed(1)} km</div>
                 </div>
             `;
         });
     } else {
-        regionsHTML += '<p style="padding: 10px; color: #16a34a;">✓ No flood regions detected - Area is safe!</p>';
+        regionsHTML += '<p style="padding: 10px; color: #16a34a; text-align: center;">✓ No flood regions detected - Area is safe!</p>';
     }
     regionsHTML += '</div>';
     
-    // Build summary
-    const summaryHTML = `
-        <div style="background: #f0f0f0; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
+    // Update the stats card content
+    const statsCard = document.getElementById('statsCard');
+    statsCard.innerHTML = `
+        <h3>📊 Flood Detection Results</h3>
+        <div style="background: #e8f5e9; padding: 12px; border-radius: 8px; margin-bottom: 12px; border-left: 3px solid #4caf50;">
+            <p style="margin: 5px 0; font-size: 0.9rem;"><strong>📍 Location:</strong> ${place}</p>
+            <p style="margin: 5px 0; font-size: 0.9rem;"><strong>📌 Coordinates:</strong> ${latitude.toFixed(4)}°N, ${longitude.toFixed(4)}°E</p>
+            <p style="margin: 5px 0; font-size: 0.9rem;"><strong>🔍 Total Regions:</strong> ${floodRegions.length}</p>
+        </div>
+        <div style="background: #fff3e0; padding: 10px; border-radius: 8px; margin-bottom: 12px; text-align: center; font-size: 0.9rem;">
             <strong>Summary:</strong><br>
             🔴 High: ${regionSummary.high_risk} | 
             🟡 Medium: ${regionSummary.medium_risk} | 
             🟢 Low: ${regionSummary.low_risk}
         </div>
+        <h4 style="margin-top: 15px; margin-bottom: 8px;">Detected Regions:</h4>
+        ${regionsHTML}
+        <button id="addToFavBtn" class="btn-secondary" style="width: 100%; margin-top: 15px;">❤️ Add to Favorites</button>
     `;
-    
-    modalContent.innerHTML = `
-        <div class="results-modal-header">
-            <h2>📍 Flood Detection Results</h2>
-            <button class="results-close-btn" onclick="this.closest('.results-modal-overlay').remove()">&times;</button>
-        </div>
-        <div class="results-modal-body">
-            <div class="results-info">
-                <p><strong>Location:</strong> ${place}</p>
-                <p><strong>Coordinates:</strong> ${latitude.toFixed(4)}°N, ${longitude.toFixed(4)}°E</p>
-                <p><strong>Total Regions:</strong> ${floodRegions.length}</p>
-            </div>
-            ${summaryHTML}
-            <h3>Detected Regions:</h3>
-            ${regionsHTML}
-        </div>
-    `;
-    
-    modal.appendChild(modalContent);
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) modal.remove();
-    });
-    
-    document.body.appendChild(modal);
 }
-
-/* ===================================
-   TOAST NOTIFICATIONS (Original)
-   =================================== */
 
 /* ===================================
    SEARCH HISTORY

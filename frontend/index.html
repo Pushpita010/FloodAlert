@@ -71,6 +71,10 @@
                     <span class="sos-text">SOS</span>
                     <span class="sos-pulse"></span>
                 </button>
+                <button id="favoritesBtn" class="favorites-btn" title="Favorites">
+                    <span class="favorites-icon">❤️</span>
+                    <span class="favorites-text">Favorites</span>
+                </button>
                 <button id="profileBtn" class="profile-btn" title="User Profile">
                     <span class="profile-indicator"></span>
                     <span id="userInitial">👤</span>
@@ -221,6 +225,17 @@
                 </div>
                 <span class="emergency-call-btn">Call</span>
             </div>
+        </div>
+    </div>
+
+    <!-- Favorites Dropdown -->
+    <div id="favoritesDropdown" class="favorites-dropdown hidden">
+        <div class="favorites-dropdown-header">
+            <h3>❤️ Saved Locations</h3>
+        </div>
+        <div class="favorites-dropdown-divider"></div>
+        <div id="favoritesDropdownList" class="favorites-dropdown-list">
+            <p style="padding: 15px; text-align: center; color: #999;">No saved locations yet</p>
         </div>
     </div>
 
