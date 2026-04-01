@@ -13,11 +13,20 @@ def get_coordinates(place):
     return lat, lon
 
 
-def get_static_map(lat, lon):
+def get_static_map(lat, lon, zoom=10, size=450):
     """
-    Get static map image (OpenStreetMap)
+    Get static map image (OpenStreetMap via Yandex API)
+    
+    Args:
+        lat: Latitude
+        lon: Longitude
+        zoom: Zoom level (9 = ~100km, 10 = ~50km)
+        size: Image size in pixels
+    
+    Returns:
+        Image bytes or None
     """
-    map_url = f"https://static-maps.yandex.ru/1.x/?ll={lon},{lat}&size=450,450&z=10&l=map"
+    map_url = f"https://static-maps.yandex.ru/1.x/?ll={lon},{lat}&size={size},{size}&z={zoom}&l=sat"
     
     response = requests.get(map_url)
     

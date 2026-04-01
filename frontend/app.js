@@ -6,6 +6,8 @@
 let map;
 let currentLocation = { lat: 20.5937, lng: 78.9629 }; // Default: India center
 let floodOverlay;
+let floodRegions = []; // Store current flood regions
+let floodLayer = L.featureGroup(); // Layer for all flood regions
 
 // Demo flood-prone areas (example polygons for different risk levels)
 const demoFloodAreas = [
@@ -75,14 +77,94 @@ function initializeMap() {
 
     // Initialize map styles and controls
     initializeMapStyle();
-
-    // Add Demo Flood Overlays
-    addFloodOverlays();
+    
+    // Add flood layer to map
+    floodLayer.addTo(map);
 
     // Add Default Marker with custom styling
     addCustomMarker(currentLocation.lat, currentLocation.lng, 'current', 'India Center');
 
     console.log('✓ Map initialized with coordinates:', currentLocation);
+}
+
+/* ===================================
+   RENDER FLOOD REGIONS ON MAP
+   =================================== */
+
+function renderFloodRegions(regions, searchLat, searchLon) {
+    // Clear previous regions
+    floodLayer.clearLayers();
+    floodRegions = regions;
+
+    if (!regions || regions.length === 0) {
+        showToast('✓ No flood regions detected in this area', 'info');
+        return;
+    }
+
+    regions.forEach((region, index) => {
+        const { center_lat, center_lon, distance_km, severity, color, confidence, area } = region;
+
+        // Color map: red, yellow, green
+        const colorMap = {
+            'red': { color: '#dc2626', fill: '#ef4444', displayName: '🔴 High Risk' },
+            'yellow': { color: '#ea580c', fill: '#f97316', displayName: '🟡 Medium Risk' },
+            'green': { color: '#16a34a', fill: '#22c55e', displayName: '🟢 Low Risk' }
+        };
+
+        const colorData = colorMap[color] || colorMap['green'];
+
+        // Create a circular marker for the flood region
+        const regionMarker = L.circleMarker(
+            [center_lat, center_lon],
+            {
+                radius: Math.sqrt(area) / 100, // Scale based on area
+                fillColor: colorData.fill,
+                color: colorData.color,
+                weight: 2,
+                opacity: 0.8,
+                fillOpacity: 0.6
+            }
+        ).addTo(floodLayer);
+
+        // Bind popup with detailed info
+        const popupContent = `
+            <div style="padding: 10px; font-family: Arial, sans-serif;">
+                <strong>Flood Region #${index + 1}</strong><br>
+                <strong style="color: ${colorData.color};">${colorData.displayName}</strong><br>
+                <br>
+                <strong>Location:</strong><br>
+                ${center_lat.toFixed(4)}°N, ${center_lon.toFixed(4)}°E<br>
+                <br>
+                <strong>Distance from Search:</strong> ${distance_km.toFixed(1)} km<br>
+                <strong>Severity:</strong> ${severity.toUpperCase()}<br>
+                <strong>Confidence:</strong> ${(confidence * 100).toFixed(0)}%<br>
+                <strong>Area:</strong> ${area} pixels<br>
+            </div>
+        `;
+
+        regionMarker.bindPopup(popupContent, {
+            className: 'flood-region-popup',
+            maxWidth: 300
+        });
+
+        // Add tooltip on hover
+        regionMarker.bindTooltip(
+            `Region ${index + 1} - ${distance_km.toFixed(1)}km away`,
+            { permanent: false, direction: 'top' }
+        );
+
+        console.log(`✓ Rendered flood region ${index + 1}: ${severity} at ${distance_km.toFixed(1)}km`);
+    });
+
+    // Fit map to show all regions plus search location
+    if (regions.length > 0) {
+        const group = L.featureGroup();
+        group.addLayer(L.marker([searchLat, searchLon]));
+        regions.forEach(r => {
+            group.addLayer(L.marker([r.center_lat, r.center_lon]));
+        });
+        map.fitBounds(group.getBounds().pad(0.1));
+    }
 }
 
 /* ===================================
@@ -123,20 +205,8 @@ function addMarker(lat, lng, title = 'Location') {
         }
     });
 
-    // Determine marker type based on risk
-    const riskData = assessFloodRisk(lat, lng);
-    let markerType = 'current';
-    
-    if (riskData.risk === 'HIGH') {
-        markerType = 'flood';
-    } else if (riskData.risk === 'MEDIUM') {
-        markerType = 'search';
-    } else if (riskData.risk === 'SAFE') {
-        markerType = 'safe';
-    }
-
     // Add custom marker
-    addCustomMarker(lat, lng, markerType, title);
+    addCustomMarker(lat, lng, 'search', title);
     map.setView([lat, lng], map.getZoom());
 
     console.log(`✓ Marker added at ${lat}, ${lng}`);
@@ -162,6 +232,44 @@ function assessFloodRisk(lat, lng) {
         zone: 'No flood zone detected',
         color: '#4caf50'
     };
+}
+
+/* ===================================
+   DISPLAY REGION STATISTICS
+   =================================== */
+
+function displayRegionStats(responseData) {
+    const { place, latitude, longitude, total_regions, region_summary, flood_regions } = responseData;
+
+    // Update info card
+    document.getElementById('infoLocation').textContent = `${place} (${total_regions} flood areas detected)`;
+    document.getElementById('infoLat').textContent = latitude.toFixed(4);
+    document.getElementById('infoLon').textContent = longitude.toFixed(4);
+
+    // Update risk stats
+    const riskElement = document.getElementById('infoRisk');
+    let riskText = '';
+    let riskColor = '#4caf50';
+
+    if (region_summary.high_risk > 0) {
+        riskText = `🔴 ${region_summary.high_risk} HIGH RISK`;
+        riskColor = '#dc2626';
+    } else if (region_summary.medium_risk > 0) {
+        riskText = `🟡 ${region_summary.medium_risk} MEDIUM RISK`;
+        riskColor = '#ea580c';
+    } else if (region_summary.low_risk > 0) {
+        riskText = `🟢 ${region_summary.low_risk} LOW RISK`;
+        riskColor = '#16a34a';
+    } else {
+        riskText = '✓ SAFE';
+        riskColor = '#16a34a';
+    }
+
+    riskElement.textContent = riskText;
+    riskElement.style.color = riskColor;
+    riskElement.style.fontWeight = 'bold';
+
+    console.log('✓ Region statistics updated:', region_summary);
 }
 
 /* ===================================
@@ -244,11 +352,9 @@ function addEventListeners() {
     map.on('click', (e) => {
         const { lat, lng } = e.latlng;
         currentLocation = { lat, lng };
-        addMarker(lat, lng, 'Clicked Location');
-        const riskData = assessFloodRisk(lat, lng);
-        updateRiskStats('Map Click', riskData);
+        addCustomMarker(lat, lng, 'search', 'Clicked Location');
         addToSearchHistory(lat.toFixed(2) + ', ' + lng.toFixed(2));
-        showToast('✓ Location updated', 'success');
+        showToast('✓ Location marked on map', 'info');
         console.log('✓ Map clicked at:', { lat, lng });
     });
 
@@ -259,64 +365,59 @@ function addEventListeners() {
    HANDLE DETECT BUTTON CLICK
    =================================== */
 
-function handleDetectClick() {
+async function handleDetectClick() {
     showLoader();
 
     const searchInput = document.getElementById('searchInput').value.trim();
 
-    // Simulate API call delay
-    setTimeout(() => {
-        if (searchInput.length > 0) {
-            // Demo: Parse coordinates if provided (format: lat,lng)
-            const coordMatch = searchInput.match(/^(-?\d+\.?\d*),\s*(-?\d+\.?\d*)$/);
+    if (searchInput.length === 0) {
+        showToast('✕ Please enter a location name', 'error');
+        hideLoader();
+        return;
+    }
 
-            if (coordMatch) {
-                const lat = parseFloat(coordMatch[1]);
-                const lng = parseFloat(coordMatch[2]);
-                currentLocation = { lat, lng };
-                addMarker(lat, lng, searchInput);
-                const riskData = assessFloodRisk(lat, lng);
-                updateRiskStats(searchInput, riskData);
-                addToSearchHistory(searchInput);
-                showToast('✓ Location detected: ' + searchInput, 'success');
-            } else {
-                // Example cities mapping (demo purposes)
-                const cityLocations = {
-                    'delhi': { lat: 28.7041, lng: 77.1025, name: 'Delhi' },
-                    'mumbai': { lat: 19.0760, lng: 72.8777, name: 'Mumbai' },
-                    'bangalore': { lat: 12.9716, lng: 77.5946, name: 'Bangalore' },
-                    'kolkata': { lat: 22.5726, lng: 88.3639, name: 'Kolkata' },
-                    'chennai': { lat: 13.0827, lng: 80.2707, name: 'Chennai' },
-                    'india': { lat: 20.5937, lng: 78.9629, name: 'India' }
-                };
+    try {
+        // Call backend API
+        const response = await fetch('http://localhost:5000/detect', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ place: searchInput })
+        });
 
-                const cityKey = searchInput.toLowerCase();
-                if (cityLocations[cityKey]) {
-                    const city = cityLocations[cityKey];
-                    currentLocation = { lat: city.lat, lng: city.lng };
-                    addMarker(city.lat, city.lng, city.name);
-                    const riskData = assessFloodRisk(city.lat, city.lng);
-                    updateRiskStats(city.name, riskData);
-                    addToSearchHistory(city.name);
-                    showToast('✓ ' + city.name + ' detected!', 'success');
-                } else {
-                    showToast('✕ Location not found. Try: Delhi, Mumbai, Bangalore', 'error');
-                    hideLoader();
-                    return;
-                }
-            }
-        } else {
-            // Detect current (default) location
-            const riskData = assessFloodRisk(currentLocation.lat, currentLocation.lng);
-            updateRiskStats('India Center', riskData);
-            showToast('✓ Analyzing current location...', 'info');
+        if (!response.ok) {
+            const error = await response.json();
+            showToast(`✕ ${error.error || 'Detection failed'}`, 'error');
+            hideLoader();
+            return;
         }
 
+        const data = await response.json();
+        
+        // Update map with search location
+        currentLocation = { lat: data.latitude, lng: data.longitude };
+        addCustomMarker(data.latitude, data.longitude, 'search', data.place);
+
+        // Render flood regions
+        renderFloodRegions(data.flood_regions, data.latitude, data.longitude);
+
+        // Display statistics
+        displayRegionStats(data);
+
+        // Add to search history
+        addToSearchHistory(data.place);
+
+        showToast(`✓ Analysis Complete! Found ${data.total_regions} flood regions`, 'success');
+        console.log('✓ Flood detection API response:', data);
+
+    } catch (error) {
+        console.error('API Error:', error);
+        showToast(`✕ Connection error: ${error.message}`, 'error');
+    } finally {
         hideLoader();
         updateLastUpdate();
-
-        console.log('✓ Flood detection completed');
-    }, 1500); // Simulate processing time
+    }
 }
 
 /* ===================================
@@ -331,7 +432,7 @@ function updateLastUpdate() {
 }
 
 // Log app info
-console.log('%c🌊 Flood Detection System v1.0', 'font-size: 14px; color: #1976d2; font-weight: bold;');
-console.log('%cDefault Location: India Center (20.5937°N, 78.9629°E)', 'font-size: 12px; color: #666;');
+console.log('%c🌊 Flood Detection System v2.0', 'font-size: 14px; color: #1976d2; font-weight: bold;');
+console.log('%cFeatures: Mask R-CNN Detection, 100km Radius Search, Color-coded Regions', 'font-size: 12px; color: #666;');
 console.log('%cTry searching for: Delhi, Mumbai, Bangalore, Kolkata, Chennai', 'font-size: 12px; color: #666;');
-console.log('%cOr enter coordinates: 28.7041,77.1025', 'font-size: 12px; color: #666;');
+console.log('%cColor Code: 🔴 Red (0-20km) | 🟡 Yellow (20-50km) | 🟢 Green (50-100km)', 'font-size: 12px; color: #666;');
