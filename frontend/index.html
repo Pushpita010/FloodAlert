@@ -410,6 +410,24 @@
                     <p class="recent-title">📍 Recent Searches:</p>
                     <div id="searchHistoryList" class="search-history-list"></div>
                 </div>
+
+                <!-- Risk Statistics Dashboard -->
+                <div id="statsCard" class="stats-card hidden">
+                    <h3>📊 Risk Analysis</h3>
+                    <div class="stat-item">
+                        <span>Overall Risk:</span>
+                        <span id="overallRisk" class="risk-badge">--</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Flood Height:</span>
+                        <span id="floodHeight">-- m</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Last Updated:</span>
+                        <span id="statsTime">--</span>
+                    </div>
+                    <button id="addToFavBtn" class="btn-secondary" style="width: 100%; margin-top: 12px;">❤️ Add to Favorites</button>
+                </div>
             </div>
 
             <!-- Favorites Section -->
@@ -442,24 +460,6 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Risk Statistics Dashboard -->
-            <div id="statsCard" class="stats-card hidden">
-                <h3>📊 Risk Analysis</h3>
-                <div class="stat-item">
-                    <span>Overall Risk:</span>
-                    <span id="overallRisk" class="risk-badge">--</span>
-                </div>
-                <div class="stat-item">
-                    <span>Flood Height:</span>
-                    <span id="floodHeight">-- m</span>
-                </div>
-                <div class="stat-item">
-                    <span>Last Updated:</span>
-                    <span id="statsTime">--</span>
-                </div>
-                <button id="addToFavBtn" class="btn-secondary">❤️ Add to Favorites</button>
-            </div>
-
             <!-- Loader (Hidden by default) -->
             <div id="loader" class="loader hidden">
                 <div class="spinner"></div>
