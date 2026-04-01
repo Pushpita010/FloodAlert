@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from utils import get_coordinates, get_static_map
 from model import predict_flood
 from PIL import Image
@@ -7,6 +8,7 @@ import numpy as np
 import base64
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 
 @app.route("/")
