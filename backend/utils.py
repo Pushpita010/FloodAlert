@@ -53,9 +53,23 @@ def get_static_map(lat, lon, zoom=10, size=450):
     """
     map_url = f"https://static-maps.yandex.ru/1.x/?ll={lon},{lat}&size={size},{size}&z={zoom}&l=sat"
     
-    response = requests.get(map_url)
-    
-    if response.status_code == 200:
-        return response.content
-    else:
+    try:
+        response = requests.get(map_url, timeout=5)
+        
+        if response.status_code == 200:
+            return response.content
+        else:
+            print(f"Map API error: {response.status_code}")
+            return None
+    except requests.exceptions.Timeout:
+        print(f"Timeout fetching map for ({lat}, {lon})")
+        return None
+    except requests.exceptions.ConnectionError:
+        print(f"Connection error fetching map - network issue")
+        return None
+    except requests.exceptions.RequestException as e:
+        print(f"Request error fetching map: {e}")
+        return None
+    except Exception as e:
+        print(f"Unexpected error in get_static_map: {e}")
         return None

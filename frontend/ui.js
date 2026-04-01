@@ -95,9 +95,13 @@ function showToast(message, type = 'success') {
    RESULTS POPUP MODAL
    =================================== */
 
-function showResultsPopup(place, latitude, longitude, floodRegions, regionSummary, searchRadius = 100) {
+function showResultsPopup(place, latitude, longitude, floodRegions, regionSummary, searchRadius = 100, weather = null) {
     // Show stats card
     document.getElementById('statsCard').classList.remove('hidden');
+    
+    // Check if location is in favorites
+    const isFavorite = uiState.favorites.some(fav => fav.lat === latitude && fav.lng === longitude);
+    const favoriteIndicator = isFavorite ? '❤️ SAVED' : '';
     
     // Calculate overall risk percentage
     let overallRiskPercent = 0;
@@ -108,6 +112,33 @@ function showResultsPopup(place, latitude, longitude, floodRegions, regionSummar
     
     // Get timestamp
     const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    
+    // Build weather section HTML
+    let weatherHTML = '';
+    if (weather) {
+        const waterLevelColor = weather.water_level_status === 'Critical' ? '#dc2626' : weather.water_level_status === 'Elevated' ? '#ea580c' : '#16a34a';
+        weatherHTML = `
+        <!-- Water Level & Temperature -->
+        <div style="background: #cffafe; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 5px solid #0284c7; font-size: 0.9rem;">
+            <div style="font-weight: 700; margin-bottom: 8px; color: #0284c7; text-transform: uppercase;">💧 Water Level & Temperature</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px;">
+                <div style="background: white; padding: 8px; border-radius: 6px; text-align: center; border: 1px solid #cffafe;">
+                    <div style="color: #666; font-size: 0.75rem; font-weight: 600;">WATER LEVEL</div>
+                    <div style="font-size: 1.4rem; font-weight: 900; color: ${waterLevelColor}; margin: 4px 0;">${weather.water_level_m}m</div>
+                    <div style="font-size: 0.7rem; color: #666; font-weight: 600;">${weather.water_level_status}</div>
+                </div>
+                <div style="background: white; padding: 8px; border-radius: 6px; text-align: center; border: 1px solid #cffafe;">
+                    <div style="color: #666; font-size: 0.75rem; font-weight: 600;">MIN TEMP</div>
+                    <div style="font-size: 1.4rem; font-weight: 900; color: #3b82f6; margin: 4px 0;">${weather.min_temperature_c}°C</div>
+                </div>
+                <div style="background: white; padding: 8px; border-radius: 6px; text-align: center; border: 1px solid #cffafe;">
+                    <div style="color: #666; font-size: 0.75rem; font-weight: 600;">MAX TEMP</div>
+                    <div style="font-size: 1.4rem; font-weight: 900; color: #ef4444; margin: 4px 0;">${weather.max_temperature_c}°C</div>
+                </div>
+            </div>
+        </div>
+        `;
+    }
     
     // Build flood regions list
     let regionsHTML = '<div class="regions-list" style="max-height: 250px; overflow-y: auto; margin-top: 12px;">';
@@ -137,10 +168,13 @@ function showResultsPopup(place, latitude, longitude, floodRegions, regionSummar
     statsCard.innerHTML = `
         <h3>📊 Risk Analysis</h3>
         
-        <!-- Location Info -->
-        <div style="background: #e8f5e9; padding: 10px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid #4caf50; font-size: 0.85rem;">
-            <p style="margin: 3px 0; font-weight: 600;">📍 ${place}</p>
-            <p style="margin: 3px 0; color: #555;">📌 ${latitude.toFixed(4)}°, ${longitude.toFixed(4)}°</p>
+        <!-- City Name (Prominent) with Favorite Indicator -->
+        <div style="background: linear-gradient(135deg, #0077be 0%, #0095d5 100%); color: white; padding: 12px; border-radius: 8px; margin-bottom: 10px; text-align: center; box-shadow: 0 2px 8px rgba(0, 119, 190, 0.3);">
+            <div style="font-size: 1.4rem; font-weight: 700; letter-spacing: 0.5px;">${place.toUpperCase()}</div>
+            ${favoriteIndicator ? `<div style="font-size: 0.85rem; margin-top: 6px; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; display: inline-block; font-weight: 600;">${favoriteIndicator}</div>` : ''}
+            <div style="font-size: 0.8rem; margin-top: 4px; opacity: 0.9;">
+                ${latitude.toFixed(4)}° N | ${longitude.toFixed(4)}° E
+            </div>
         </div>
         
         <!-- Risk Metrics -->
@@ -154,6 +188,8 @@ function showResultsPopup(place, latitude, longitude, floodRegions, regionSummar
                 <div style="font-size: 1.3rem; font-weight: bold; color: #1976d2;">${floodRegions.length}</div>
             </div>
         </div>
+        
+        ${weatherHTML}
         
         <!-- Summary Stats -->
         <div style="background: #fff3e0; padding: 8px; border-radius: 8px; margin-bottom: 10px; font-size: 0.85rem;">
@@ -179,6 +215,16 @@ function showResultsPopup(place, latitude, longitude, floodRegions, regionSummar
         
         <button id="addToFavBtn" class="btn-secondary" style="width: 100%; margin-top: 8px; font-size: 0.9rem; padding: 8px;">❤️ Add to Favorites</button>
     `;
+    
+    // Add event listener to the newly created button
+    const addToFavBtn = document.getElementById('addToFavBtn');
+    if (addToFavBtn) {
+        addToFavBtn.addEventListener('click', () => {
+            if (window.currentLocationForFav) {
+                addToFavorites(window.currentLocationForFav);
+            }
+        });
+    }
 }
 
 /* ===================================
@@ -573,16 +619,337 @@ function closeProfileDropdown() {
 }
 
 /* ===================================
+   REPORT GENERATION
+   =================================== */
+
+function initializeReportButton() {
+    const reportBtn = document.getElementById('reportBtn');
+    if (!reportBtn) return;
+    
+    reportBtn.addEventListener('click', generateFloodReport);
+}
+
+function generateFloodReport() {
+    // Check if detection data is available
+    if (!currentDetectionData) {
+        showToast('⚠️ No flood detection data available. Search for a location first.', 'warning');
+        return;
+    }
+    
+    const data = currentDetectionData;
+    const {
+        place,
+        latitude,
+        longitude,
+        total_regions,
+        region_summary,
+        flood_regions,
+        search_radius_km
+    } = data;
+    
+    // Calculate overall risk percentage
+    let overallRiskPercent = 0;
+    let riskLevel = 'Low';
+    
+    if (region_summary.high_risk > 0) {
+        riskLevel = 'High';
+        overallRiskPercent = Math.min(100, (region_summary.high_risk / total_regions) * 100);
+    } else if (region_summary.medium_risk > 0) {
+        riskLevel = 'Medium';
+        overallRiskPercent = Math.min(75, (region_summary.medium_risk / total_regions) * 50);
+    } else if (region_summary.low_risk > 0) {
+        riskLevel = 'Low';
+        overallRiskPercent = (region_summary.low_risk / total_regions) * 25;
+    }
+    
+    // Build risk distribution details
+    let riskDistHTML = '';
+    if (region_summary.high_risk > 0) {
+        riskDistHTML += `<div style="margin: 8px 0; padding: 8px; background: rgba(220, 38, 38, 0.1); border-left: 3px solid #dc2626; border-radius: 4px;">
+            <strong style="color: #dc2626;">🔴 High Risk:</strong> ${region_summary.high_risk} region(s)
+        </div>`;
+    }
+    if (region_summary.medium_risk > 0) {
+        riskDistHTML += `<div style="margin: 8px 0; padding: 8px; background: rgba(234, 88, 12, 0.1); border-left: 3px solid #ea580c; border-radius: 4px;">
+            <strong style="color: #ea580c;">🟡 Medium Risk:</strong> ${region_summary.medium_risk} region(s)
+        </div>`;
+    }
+    if (region_summary.low_risk > 0) {
+        riskDistHTML += `<div style="margin: 8px 0; padding: 8px; background: rgba(22, 163, 74, 0.1); border-left: 3px solid #16a34a; border-radius: 4px;">
+            <strong style="color: #16a34a;">🟢 Low Risk:</strong> ${region_summary.low_risk} region(s)
+        </div>`;
+    }
+    if (!riskDistHTML) {
+        riskDistHTML = `<div style="margin: 8px 0; padding: 8px; background: rgba(22, 163, 74, 0.1); border-left: 3px solid #16a34a; border-radius: 4px;">
+            <strong style="color: #16a34a;">✓ Safe:</strong> No flood-prone regions detected
+        </div>`;
+    }
+    
+    // Get top affected regions
+    let regionsHTML = '';
+    if (flood_regions && flood_regions.length > 0) {
+        const topRegions = flood_regions.slice(0, 5);
+        regionsHTML = topRegions.map((region, idx) => `
+            <div style="margin: 8px 0; padding: 10px; background: var(--bg-secondary); border-radius: 6px;">
+                <strong>${idx + 1}. ${region.name || 'Unnamed Region'}</strong>
+                <div style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 4px;">
+                    Severity: <span style="color: ${region.severity > 0.7 ? '#dc2626' : region.severity > 0.4 ? '#ea580c' : '#16a34a'}; font-weight: 600;">${(region.severity * 100).toFixed(1)}%</span>
+                    | Confidence: ${(region.confidence * 100).toFixed(1)}%
+                    | Distance: ${(region.distance || 0).toFixed(1)} km
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    const timestamp = new Date().toLocaleString();
+    
+    // Build weather section for report
+    let weatherReportHTML = '';
+    if (data.weather) {
+        const w = data.weather;
+        const waterLevelColor = w.water_level_status === 'Critical' ? '#dc2626' : w.water_level_status === 'Elevated' ? '#ea580c' : '#16a34a';
+        weatherReportHTML = `
+            <div class="report-section">
+                <h4>💧 Water Level & Temperature</h4>
+                <div style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; font-size: 0.95rem;">
+                    <div style="margin: 6px 0; padding: 8px; background: rgba(2, 132, 199, 0.1); border-radius: 6px; border-left: 3px solid #0284c7;">
+                        <div style="color: #666;"><strong>Water Level:</strong> <span style="color: ${waterLevelColor}; font-weight: 600; font-size: 1.1rem;">${w.water_level_m}m</span></div>
+                        <div style="margin-top: 4px; font-size: 0.9rem;">Status: <span style="font-weight: 600; color: ${waterLevelColor};">${w.water_level_status}</span></div>
+                    </div>
+                    <div style="margin: 8px 0; padding: 8px; background: rgba(234, 88, 12, 0.1); border-radius: 6px; border-left: 3px solid #ea580c;">
+                        <div style="color: #666;"><strong>Temperature Range:</strong></div>
+                        <div style="margin-top: 4px;">Min: <span style="font-weight: 600;">${w.min_temperature_c}°C</span> | Max: <span style="font-weight: 600;">${w.max_temperature_c}°C</span></div>
+                        <div style="margin-top: 4px; font-size: 0.9rem;">Current: <span style="font-weight: 600;">${w.current_temperature_c}°C</span></div>
+                    </div>
+                    <div style="margin: 8px 0; padding: 8px; background: rgba(99, 102, 241, 0.1); border-radius: 6px; border-left: 3px solid #6366f1;">
+                        <div style="color: #666;"><strong>Humidity:</strong> <span style="font-weight: 600;">${w.humidity_percent}%</span></div>
+                        <div style="margin-top: 4px;"><strong>Rainfall:</strong> <span style="font-weight: 600;">${w.rainfall_mm}mm</span></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Create comprehensive report HTML
+    const reportHTML = `
+        <div class="report-modal-content">
+            <h2>📋 Flood Detection Report</h2>
+            <div class="report-header">
+                <h3>${place}</h3>
+                <p class="report-timestamp">Generated: ${timestamp}</p>
+            </div>
+            
+            <div class="report-section">
+                <h4>📍 Location Details</h4>
+                <div style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; font-size: 0.95rem;">
+                    <div style="margin: 6px 0;"><strong>Place:</strong> ${place}</div>
+                    <div style="margin: 6px 0;"><strong>Coordinates:</strong> ${latitude.toFixed(4)}°N, ${longitude.toFixed(4)}°E</div>
+                    <div style="margin: 6px 0;"><strong>Search Radius:</strong> ${(search_radius_km || 50).toFixed(1)} km</div>
+                </div>
+            </div>
+            
+            <div class="report-section">
+                <h4>⚠️ Risk Assessment</h4>
+                <div class="report-risk-card">
+                    <div style="text-align: center; padding: 12px;">
+                        <div style="font-size: 2.2rem; font-weight: 700; color: ${riskLevel === 'High' ? '#dc2626' : riskLevel === 'Medium' ? '#ea580c' : '#16a34a'};">
+                            ${overallRiskPercent.toFixed(1)}%
+                        </div>
+                        <div style="color: var(--text-secondary); margin-top: 6px; font-weight: 600;">
+                            Overall Risk Level: <span style="color: ${riskLevel === 'High' ? '#dc2626' : riskLevel === 'Medium' ? '#ea580c' : '#16a34a'};">${riskLevel}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            ${weatherReportHTML}
+            
+            <div class="report-section">
+                <h4>🔍 Detection Summary</h4>
+                <div style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; font-size: 0.95rem;">
+                    <div style="margin: 6px 0;"><strong>Total Regions Found:</strong> ${total_regions}</div>
+                    <div style="margin: 6px 0;"><strong>Analysis Status:</strong> ✓ Complete</div>
+                    ${total_regions > 0 ? `<div style="margin: 6px 0;"><strong>Reliability:</strong> High confidence detection based on satellite imagery</div>` : '<div style="margin: 6px 0;"><strong>Status:</strong> No flood-prone areas detected in this region</div>'}
+                </div>
+            </div>
+            
+            <div class="report-section">
+                <h4>📊 Risk Distribution</h4>
+                <div>${riskDistHTML}</div>
+            </div>
+            
+            ${regionsHTML ? `
+            <div class="report-section">
+                <h4>🌊 Top Affected Regions</h4>
+                <div>${regionsHTML}</div>
+            </div>
+            ` : ''}
+            
+            <div class="report-section">
+                <h4>💡 Recommendations</h4>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li>Monitor weather forecasts for this region</li>
+                    <li>${riskLevel === 'High' ? 'Stay alert and prepare emergency supplies' : 'Keep updated with local flood warnings'}</li>
+                    <li>Maintain emergency contact numbers</li>
+                    <li>Check this location periodically for updated analysis</li>
+                </ul>
+            </div>
+            
+            <div class="report-actions">
+                <button class="report-export-btn" onclick="downloadReport()">
+                    📥 Download Report
+                </button>
+                <button class="report-share-btn" onclick="shareReport()">
+                    📤 Share Report
+                </button>
+                <button class="report-close-btn" onclick="closeReportModal()">
+                    Close
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Show report in modal
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'modal-overlay';
+    modalOverlay.id = 'reportModalOverlay';
+    modalOverlay.innerHTML = reportHTML;
+    
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) {
+            closeReportModal();
+        }
+    });
+    
+    document.body.appendChild(modalOverlay);
+    showToast('✓ Report generated successfully', 'success');
+}
+
+function closeReportModal() {
+    const overlay = document.getElementById('reportModalOverlay');
+    if (overlay) {
+        overlay.style.animation = 'fadeOut 0.3s ease-out';
+        setTimeout(() => overlay.remove(), 300);
+    }
+}
+
+function downloadReport() {
+    if (!currentDetectionData) {
+        showToast('⚠️ No report data available', 'warning');
+        return;
+    }
+    
+    const data = currentDetectionData;
+    const { place, latitude, longitude, total_regions, region_summary, search_radius_km } = data;
+    
+    // Calculate overall risk
+    let riskLevel = 'Low';
+    if (region_summary.high_risk > 0) riskLevel = 'High';
+    else if (region_summary.medium_risk > 0) riskLevel = 'Medium';
+    
+    // Create detailed text report
+    const reportText = `
+FLOOD DETECTION REPORT
+${'='.repeat(60)}
+
+GENERATED: ${new Date().toLocaleString()}
+LOCATION: ${place}
+
+LOCATION DETAILS:
+  Latitude: ${latitude.toFixed(4)}°N
+  Longitude: ${longitude.toFixed(4)}°E
+  Search Radius: ${(search_radius_km || 50).toFixed(1)} km
+
+RISK ASSESSMENT:
+  Overall Risk Level: ${riskLevel}
+  High Risk Regions: ${region_summary.high_risk}
+  Medium Risk Regions: ${region_summary.medium_risk}
+  Low Risk Regions: ${region_summary.low_risk}
+  Total Regions Found: ${total_regions}
+
+ANALYSIS STATUS:
+  ✓ Detection completed successfully
+  ✓ Based on satellite imagery analysis
+
+RECOMMENDATIONS:
+  1. Monitor weather forecasts for this region
+  2. ${riskLevel === 'High' ? 'ALERT: Stay alert and prepare emergency supplies' : 'Keep updated with local flood warnings'}
+  3. Maintain emergency contact numbers
+  4. Check this location periodically for updates
+
+${'='.repeat(60)}
+Report Generated by FloodAlert - Flood Detection System
+For more information, visit the application
+    `.trim();
+    
+    // Create download link
+    const element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(reportText));
+    element.setAttribute('download', `FloodReport_${place.replace(/\s+/g, '_')}_${new Date().getTime()}.txt`);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+    
+    showToast('✓ Report downloaded successfully', 'success');
+}
+
+function shareReport() {
+    if (!currentDetectionData) {
+        showToast('⚠️ No report data available', 'warning');
+        return;
+    }
+    
+    const data = currentDetectionData;
+    const { place, total_regions, region_summary } = data;
+    
+    let riskLevel = 'Low';
+    if (region_summary.high_risk > 0) riskLevel = 'High';
+    else if (region_summary.medium_risk > 0) riskLevel = 'Medium';
+    
+    const shareText = `Flood Detection Report for ${place}
+    
+Risk Level: ${riskLevel}
+Total Regions: ${total_regions}
+High Risk: ${region_summary.high_risk} | Medium Risk: ${region_summary.medium_risk} | Low Risk: ${region_summary.low_risk}
+
+Generated by FloodAlert - Stay Safe! 🌊`;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: 'Flood Detection Report',
+            text: shareText
+        }).then(() => {
+            showToast('✓ Report shared successfully', 'success');
+        }).catch(err => {
+            // Fallback to clipboard
+            fallbackCopyToClipboard(shareText);
+        });
+    } else {
+        fallbackCopyToClipboard(shareText);
+    }
+}
+
+function fallbackCopyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('✓ Report copied to clipboard', 'success');
+    }).catch(() => {
+        showToast('Could not share report', 'error');
+    });
+}
+
+/* ===================================
    INITIALIZE ALL UI FEATURES
    =================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeDarkMode();
     initializeEmergencyButton();
+    initializeReportButton();
     initializeModals();
     updateSearchHistoryUI();
     updateFavoritesUI();
     setupFavoritesButton();
     
-    console.log('✓ UI features initialized (Dark Mode, Emergency SOS, Toasts, History, Favorites, Modals)');
+    console.log('✓ UI features initialized (Dark Mode, Emergency SOS, Report, Toasts, History, Favorites, Modals)');
 });

@@ -8,6 +8,7 @@ let currentLocation = { lat: 20.5937, lng: 78.9629 }; // Default: India center
 let floodOverlay;
 let floodRegions = []; // Store current flood regions
 let floodLayer = L.featureGroup(); // Layer for all flood regions
+let currentDetectionData = null; // Store current detection data for reports
 
 // Demo flood-prone areas (example polygons for different risk levels)
 const demoFloodAreas = [
@@ -244,6 +245,12 @@ function displayRegionStats(responseData) {
     // Show stats card
     document.getElementById('statsCard').classList.remove('hidden');
 
+    // Update the heading to show city name prominently
+    const heading = document.querySelector('#statsCard h3');
+    if (heading) {
+        heading.innerHTML = `<div style="background: linear-gradient(135deg, #0077be 0%, #0095d5 100%); color: white; padding: 12px; border-radius: 8px; margin: -16px -16px 12px -16px; text-align: center; font-size: 1.3rem; letter-spacing: 0.5px;">${place.toUpperCase()}</div>`;
+    }
+
     // Update overall risk
     const riskElement = document.getElementById('overallRisk');
     let riskText = '';
@@ -388,14 +395,29 @@ async function handleDetectClick() {
             body: JSON.stringify({ place: searchInput })
         });
 
+        console.log('✓ Response status:', response.status, response.statusText);
+
         if (!response.ok) {
-            const error = await response.json();
-            showToast(`✕ ${error.error || 'Detection failed'}`, 'error');
+            let errorMsg = 'Detection failed';
+            try {
+                const error = await response.json();
+                errorMsg = error.error || errorMsg;
+            } catch (e) {
+                errorMsg = `HTTP ${response.status}`;
+            }
+            showToast(`✕ ${errorMsg}`, 'error');
             hideLoader();
             return;
         }
 
         const data = await response.json();
+        console.log('✓ Response data received:', data);
+
+        if (!data.success && !data.place) {
+            showToast('✕ Invalid response from server', 'error');
+            hideLoader();
+            return;
+        }
         
         // Update map with search location
         currentLocation = { lat: data.latitude, lng: data.longitude };
@@ -404,24 +426,25 @@ async function handleDetectClick() {
         // Render flood regions
         renderFloodRegions(data.flood_regions, data.latitude, data.longitude);
 
+        // Store detection data for report generation
+        currentDetectionData = data;
+
         // Display statistics
         displayRegionStats(data);
 
         // Show results popup with coordinates and regions
-        showResultsPopup(data.place, data.latitude, data.longitude, data.flood_regions, data.region_summary, data.search_radius_km);
-        
-        // Setup the Add to Favorites button
-        setupFavoritesButton();
+        showResultsPopup(data.place, data.latitude, data.longitude, data.flood_regions, data.region_summary, data.search_radius_km, data.weather);
 
         // Add to search history
         addToSearchHistory(data.place);
 
         showToast(`✓ Analysis Complete! Found ${data.total_regions} flood regions`, 'success');
-        console.log('✓ Flood detection API response:', data);
+        console.log('✓ Flood detection analysis complete');
 
     } catch (error) {
-        console.error('API Error:', error);
-        showToast(`✕ Connection error: ${error.message}`, 'error');
+        console.error('✗ API Error:', error);
+        console.error('Error message:', error.message);
+        showToast(`✕ Connection error: ${error.message || 'Failed to reach server'}`, 'error');
     } finally {
         hideLoader();
         updateLastUpdate();
