@@ -241,13 +241,11 @@ function assessFloodRisk(lat, lng) {
 function displayRegionStats(responseData) {
     const { place, latitude, longitude, total_regions, region_summary, flood_regions } = responseData;
 
-    // Update info card
-    document.getElementById('infoLocation').textContent = `${place} (${total_regions} flood areas detected)`;
-    document.getElementById('infoLat').textContent = latitude.toFixed(4);
-    document.getElementById('infoLon').textContent = longitude.toFixed(4);
+    // Show stats card
+    document.getElementById('statsCard').classList.remove('hidden');
 
-    // Update risk stats
-    const riskElement = document.getElementById('infoRisk');
+    // Update overall risk
+    const riskElement = document.getElementById('overallRisk');
     let riskText = '';
     let riskColor = '#4caf50';
 
@@ -268,6 +266,10 @@ function displayRegionStats(responseData) {
     riskElement.textContent = riskText;
     riskElement.style.color = riskColor;
     riskElement.style.fontWeight = 'bold';
+
+    // Update stats time
+    const now = new Date().toLocaleTimeString();
+    document.getElementById('statsTime').textContent = now;
 
     console.log('✓ Region statistics updated:', region_summary);
 }
