@@ -307,15 +307,15 @@ function updateFavoritesUI() {
     const favoritesList = document.getElementById('favoritesList');
     const favoritesDropdownList = document.getElementById('favoritesDropdownList');
     
+    const emptyMsg = '<p class="empty-state">No saved locations yet</p>';
+    
     if (uiState.favorites.length === 0) {
-        favoritesList.innerHTML = '<p class="empty-state">No saved locations yet</p>';
-        if (favoritesDropdownList) {
-            favoritesDropdownList.innerHTML = '<p class="empty-state">No saved locations yet</p>';
-        }
+        if (favoritesList) favoritesList.innerHTML = emptyMsg;
+        if (favoritesDropdownList) favoritesDropdownList.innerHTML = emptyMsg;
         return;
     }
     
-    favoritesList.innerHTML = '';
+    if (favoritesList) favoritesList.innerHTML = '';
     if (favoritesDropdownList) favoritesDropdownList.innerHTML = '';
     
     uiState.favorites.forEach(fav => {
@@ -346,7 +346,7 @@ function updateFavoritesUI() {
             document.getElementById('detectBtn').click();
         });
         
-        favoritesList.appendChild(favItem);
+        if (favoritesList) favoritesList.appendChild(favItem);
         
         // Also update dropdown favorites list
         if (favoritesDropdownList) {
